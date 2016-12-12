@@ -35,3 +35,12 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
 
     def get_opt_lists(self):
         return [('service_available', [project_config.service_option])]
+
+    def get_service_clients(self):
+        v1_params = {
+            'name': 'secret_v1',
+            'service_version': 'secret.v1',
+            'module_path': 'barbican_tempest_plugin.services.key_manager.json',
+            'client_names': ['SecretClient'],
+        }
+        return [v1_params]
