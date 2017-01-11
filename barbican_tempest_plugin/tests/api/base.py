@@ -23,7 +23,7 @@ from barbican_tempest_plugin import clients
 CONF = config.CONF
 
 # NOTE(dane-fichter): We need to track resource types for cleanup.
-RESOURCE_TYPES = ['secret']
+RESOURCE_TYPES = ['secret', 'container']
 
 
 def _get_uuid(href):
@@ -39,6 +39,8 @@ def creates(resource):
             resp = f(cls, *args, **kwargs)
             if resource == 'secret':
                 uuid = _get_uuid(resp['secret_ref'])
+            if resource == 'container':
+                uuid = _get_uuid(resp['container_ref'])
             cls.created_objects[resource].add(uuid)
             return resp
         return wrapper
@@ -58,6 +60,9 @@ class BaseKeyManagerTest(test.BaseTestCase):
         super(BaseKeyManagerTest, cls).setup_clients()
         os = getattr(cls, 'os_%s' % cls.credentials[0])
         cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
+        cls.container_client = os.secret_v1.ContainerClient(
+            service='key-manager'
+        )
 
     @classmethod
     def resource_setup(cls):
@@ -68,8 +73,10 @@ class BaseKeyManagerTest(test.BaseTestCase):
     @classmethod
     def resource_cleanup(cls):
         try:
-            for secret_uuid in cls.created_objects['secret']:
+            for secret_uuid in list(cls.created_objects['secret']):
                 cls.delete_secret(secret_uuid)
+            for container_uuid in list(cls.created_objects['container']):
+                cls.delete_container(container_uuid)
         finally:
             super(BaseKeyManagerTest, cls).resource_cleanup()
 
@@ -82,3 +89,13 @@ class BaseKeyManagerTest(test.BaseTestCase):
     def delete_secret(cls, uuid):
         cls.created_objects['secret'].remove(uuid)
         return cls.secret_client.delete_secret(uuid)
+
+    @classmethod
+    @creates('container')
+    def create_container(cls, **kwargs):
+        return cls.container_client.create_container(**kwargs)
+
+    @classmethod
+    def delete_container(cls, uuid):
+        cls.created_objects['container'].remove(uuid)
+        return cls.container_client.delete_container(uuid)

@@ -41,6 +41,6 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
             'name': 'secret_v1',
             'service_version': 'secret.v1',
             'module_path': 'barbican_tempest_plugin.services.key_manager.json',
-            'client_names': ['SecretClient'],
+            'client_names': ['SecretClient', 'ContainerClient'],
         }
         return [v1_params]

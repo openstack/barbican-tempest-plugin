@@ -12,7 +12,9 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from barbican_tempest_plugin.services.key_manager.json.container_client \
+    import ContainerClient
 from barbican_tempest_plugin.services.key_manager.json.secret_client import \
     SecretClient
 
-__all__ = ['SecretClient']
+__all__ = ['SecretClient', 'ContainerClient']
