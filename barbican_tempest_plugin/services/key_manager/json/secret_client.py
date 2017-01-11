@@ -38,3 +38,43 @@ class SecretClient(rest_client.RestClient):
         resp, body = self.delete("v1/secrets/%s" % secret_id)
         self.expected_success(204, resp.status)
         return body
+
+    def list_secrets(self, **kwargs):
+        uri = "v1/secrets"
+        if kwargs is not None:
+            uri = '{base}?'.format(base=uri)
+
+            for key in kwargs.keys():
+                uri = '{base}&{name}={value}'.format(
+                    base=uri,
+                    name=key,
+                    value=kwargs[key]
+                )
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_secret_metadata(self, secret_id):
+        resp, body = self.get("v1/secrets/%s" % secret_id)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_secret_payload(self, secret_id):
+        content_headers = {
+            "Accept": "application/octet-stream"
+        }
+        resp, body = self.get("v1/secrets/%s/payload" % secret_id,
+                              headers=content_headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def put_secret_payload(self, secret_id, payload):
+        content_headers = {
+            "Content-Type": "application/octet-stream",
+            "Content-Encoding": "base64"
+        }
+        resp, body = self.put("v1/secrets/%s" % secret_id,
+                              payload,
+                              headers=content_headers)
+        self.expected_success(204, resp.status)
+        return body
