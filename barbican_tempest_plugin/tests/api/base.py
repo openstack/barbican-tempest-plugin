@@ -65,6 +65,9 @@ class BaseKeyManagerTest(test.BaseTestCase):
         cls.container_client = os.secret_v1.ContainerClient(
             service='key-manager'
         )
+        cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
+            service='key-manager'
+        )
         cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
 
     @classmethod

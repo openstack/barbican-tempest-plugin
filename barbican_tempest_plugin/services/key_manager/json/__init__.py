@@ -18,5 +18,12 @@ from barbican_tempest_plugin.services.key_manager.json.container_client \
     import ContainerClient
 from barbican_tempest_plugin.services.key_manager.json.secret_client \
     import SecretClient
+from barbican_tempest_plugin.services.key_manager.json.secret_metadata_client \
+    import SecretMetadataClient
 
-__all__ = ['ConsumerClient', 'ContainerClient', 'SecretClient']
+__all__ = [
+    'ConsumerClient',
+    'ContainerClient',
+    'SecretMetadataClient',
+    'SecretClient'
+]
