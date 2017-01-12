@@ -59,10 +59,13 @@ class BaseKeyManagerTest(test.BaseTestCase):
     def setup_clients(cls):
         super(BaseKeyManagerTest, cls).setup_clients()
         os = getattr(cls, 'os_%s' % cls.credentials[0])
-        cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
+        cls.consumer_client = os.secret_v1.ConsumerClient(
+            service='key-manager'
+        )
         cls.container_client = os.secret_v1.ContainerClient(
             service='key-manager'
         )
+        cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
 
     @classmethod
     def resource_setup(cls):
