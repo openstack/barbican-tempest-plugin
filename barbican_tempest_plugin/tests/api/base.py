@@ -23,7 +23,7 @@ from barbican_tempest_plugin import clients
 CONF = config.CONF
 
 # NOTE(dane-fichter): We need to track resource types for cleanup.
-RESOURCE_TYPES = ['secret', 'container']
+RESOURCE_TYPES = ['container', 'order', 'secret']
 
 
 def _get_uuid(href):
@@ -37,10 +37,16 @@ def creates(resource):
         @functools.wraps(f)
         def wrapper(cls, *args, **kwargs):
             resp = f(cls, *args, **kwargs)
-            if resource == 'secret':
-                uuid = _get_uuid(resp['secret_ref'])
             if resource == 'container':
                 uuid = _get_uuid(resp['container_ref'])
+            if resource == 'order':
+                uuid = _get_uuid(resp.get('order_ref'))
+                order_metadata = cls.get_order(uuid)
+                secret_ref = order_metadata.get('secret_ref')
+                if secret_ref:
+                    cls.created_objects['secret'].add(_get_uuid(secret_ref))
+            if resource == 'secret':
+                uuid = _get_uuid(resp['secret_ref'])
             cls.created_objects[resource].add(uuid)
             return resp
         return wrapper
@@ -65,10 +71,11 @@ class BaseKeyManagerTest(test.BaseTestCase):
         cls.container_client = os.secret_v1.ContainerClient(
             service='key-manager'
         )
+        cls.order_client = os.secret_v1.OrderClient(service='key-manager')
+        cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
-        cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
 
     @classmethod
     def resource_setup(cls):
@@ -79,22 +86,14 @@ class BaseKeyManagerTest(test.BaseTestCase):
     @classmethod
     def resource_cleanup(cls):
         try:
-            for secret_uuid in list(cls.created_objects['secret']):
-                cls.delete_secret(secret_uuid)
             for container_uuid in list(cls.created_objects['container']):
                 cls.delete_container(container_uuid)
+            for order_uuid in list(cls.created_objects['order']):
+                cls.delete_order(order_uuid)
+            for secret_uuid in list(cls.created_objects['secret']):
+                cls.delete_secret(secret_uuid)
         finally:
             super(BaseKeyManagerTest, cls).resource_cleanup()
-
-    @classmethod
-    @creates('secret')
-    def create_secret(cls, **kwargs):
-        return cls.secret_client.create_secret(**kwargs)
-
-    @classmethod
-    def delete_secret(cls, uuid):
-        cls.created_objects['secret'].remove(uuid)
-        return cls.secret_client.delete_secret(uuid)
 
     @classmethod
     @creates('container')
@@ -105,3 +104,27 @@ class BaseKeyManagerTest(test.BaseTestCase):
     def delete_container(cls, uuid):
         cls.created_objects['container'].remove(uuid)
         return cls.container_client.delete_container(uuid)
+
+    @classmethod
+    @creates('order')
+    def create_order(cls, **kwargs):
+        return cls.order_client.create_order(**kwargs)
+
+    @classmethod
+    def get_order(cls, uuid):
+        return cls.order_client.get_order(uuid)
+
+    @classmethod
+    def delete_order(cls, uuid):
+        cls.created_objects['order'].remove(uuid)
+        return cls.order_client.delete_order(uuid)
+
+    @classmethod
+    @creates('secret')
+    def create_secret(cls, **kwargs):
+        return cls.secret_client.create_secret(**kwargs)
+
+    @classmethod
+    def delete_secret(cls, uuid):
+        cls.created_objects['secret'].remove(uuid)
+        return cls.secret_client.delete_secret(uuid)
