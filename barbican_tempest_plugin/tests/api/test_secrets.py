@@ -49,3 +49,48 @@ class SecretsTest(base.BaseKeyManagerTest):
         )
         uuid = base._get_uuid(sec['secret_ref'])
         self.delete_secret(uuid)
+
+    def test_list_secrets(self):
+        # Create two secrets
+        self.create_secret(name='secret_1')
+        self.create_secret(name='secret_2')
+
+        # Ask Barbican to list these secrets
+        resp = self.secret_client.list_secrets(name='secret_1')
+        secrets = resp['secrets']
+        self.assertEqual('secret_1', secrets[0]['name'])
+
+        resp = self.secret_client.list_secrets(name='secret_2')
+        secrets = resp['secrets']
+        self.assertEqual('secret_2', secrets[0]['name'])
+
+    def test_get_secret_metadata(self):
+        secret = self.create_secret()
+        uuid = base._get_uuid(secret['secret_ref'])
+        resp = self.secret_client.get_secret_metadata(uuid)
+        self.assertEqual(uuid, base._get_uuid(resp['secret_ref']))
+        self.delete_secret(uuid)
+
+    def test_get_and_put_payload(self):
+        # Create secret without payload
+        secret = self.create_secret()
+        uuid = base._get_uuid(secret['secret_ref'])
+
+        # Create AES key payload
+        password = b"password"
+        salt = os.urandom(16)
+        kdf = PBKDF2HMAC(
+            algorithm=hashes.SHA256(), length=32, salt=salt,
+            iterations=1000, backend=default_backend()
+        )
+        key = base64.b64encode(kdf.derive(password))
+
+        # Associate the payload with the created secret
+        self.secret_client.put_secret_payload(uuid, key)
+
+        # Retrieve the payload
+        payload = self.secret_client.get_secret_payload(uuid)
+        self.assertEqual(key, base64.b64encode(payload))
+
+        # Clean up
+        self.delete_secret(uuid)
