@@ -23,7 +23,7 @@ from barbican_tempest_plugin import clients
 CONF = config.CONF
 
 # NOTE(dane-fichter): We need to track resource types for cleanup.
-RESOURCE_TYPES = ['container', 'order', 'secret']
+RESOURCE_TYPES = ['container', 'order', 'quota', 'secret']
 
 
 def _get_uuid(href):
@@ -45,6 +45,9 @@ def creates(resource):
                 secret_ref = order_metadata.get('secret_ref')
                 if secret_ref:
                     cls.created_objects['secret'].add(_get_uuid(secret_ref))
+                uuid = _get_uuid(resp['order_ref'])
+            if resource == 'quota':
+                uuid = _get_uuid(args[0])
             if resource == 'secret':
                 uuid = _get_uuid(resp['secret_ref'])
             cls.created_objects[resource].add(uuid)
@@ -57,7 +60,7 @@ class BaseKeyManagerTest(test.BaseTestCase):
     """Base class for all api tests."""
 
     # Why do I have to be an admin to create secrets? No idea...
-    credentials = ('admin', )
+    credentials = ('admin', ['service_admin', 'key-manager:service-admin'])
     client_manager = clients.Clients
     created_objects = {}
 
@@ -77,6 +80,9 @@ class BaseKeyManagerTest(test.BaseTestCase):
             service='key-manager'
         )
 
+        os = getattr(cls, 'os_roles_%s' % cls.credentials[1][0])
+        cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')
+
     @classmethod
     def resource_setup(cls):
         super(BaseKeyManagerTest, cls).resource_setup()
@@ -90,6 +96,8 @@ class BaseKeyManagerTest(test.BaseTestCase):
                 cls.delete_container(container_uuid)
             for order_uuid in list(cls.created_objects['order']):
                 cls.delete_order(order_uuid)
+            for project_quota_uuid in list(cls.created_objects['quota']):
+                cls.delete_project_quota(project_quota_uuid)
             for secret_uuid in list(cls.created_objects['secret']):
                 cls.delete_secret(secret_uuid)
         finally:
@@ -118,6 +126,16 @@ class BaseKeyManagerTest(test.BaseTestCase):
     def delete_order(cls, uuid):
         cls.created_objects['order'].remove(uuid)
         return cls.order_client.delete_order(uuid)
+
+    @classmethod
+    @creates('quota')
+    def create_project_quota(cls, project_id, **kwargs):
+        return cls.quota_client.create_project_quota(project_id, **kwargs)
+
+    @classmethod
+    def delete_project_quota(cls, project_id):
+        cls.created_objects['quota'].remove(project_id)
+        return cls.quota_client.delete_project_quota(project_id)
 
     @classmethod
     @creates('secret')

@@ -45,6 +45,7 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
                 'ConsumerClient',
                 'ContainerClient',
                 'OrderClient',
+                'QuotaClient',
                 'SecretClient',
                 'SecretMetadataClient'
             ],
