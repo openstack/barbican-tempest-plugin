@@ -12,14 +12,22 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest import clients
+from tempest.common import credentials_factory as common_creds
 from tempest import config
-from tempest.lib.services import clients
-
+from tempest.lib.services import clients as cli
 
 CONF = config.CONF
 
+ADMIN_CREDS = common_creds.get_configured_admin_credentials()
 
-class Clients(clients.ServiceClients):
+
+class Manager(clients.Manager):
+    def __init__(self, credentials=ADMIN_CREDS):
+        super(Manager, self).__init__(credentials)
+
+
+class Clients(cli.ServiceClients):
     """Tempest stable service clients and loaded plugins service clients"""
 
     def __init__(self, credentials, service=None):
