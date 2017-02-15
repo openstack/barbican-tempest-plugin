@@ -1,0 +1,17 @@
+#!/bin/bash
+#
+# This script is executed inside pre_test_hook function in devstack gate.
+
+set -ex
+
+export DEST=${DEST:-$BASE/new}
+export DEVSTACK_DIR=${DEVSTACK_DIRE:-$DEST/devstack}
+export LOCALCONF_PATH=$DEVSTACK_DIR/local.conf
+
+# Here we can set some configurations for local.conf
+# for example, to pass some config options directly to .conf files
+
+echo -e '[[post-config|$NOVA_CONF]]' >> $LOCALCONF_PATH
+echo -e '[glance]' >> $LOCALCONF_PATH
+echo -e 'verify_glance_signatures = True' >> $LOCALCONF_PATH
+
