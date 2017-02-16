@@ -1,19 +1,25 @@
 ===============================
-barbican_tempest_plugin
+Tempest Integration of Barbican
 ===============================
 
-OpenStack barbican tempest tests.
+This project defines a tempest plugin containing tests used to verify the
+functionality of a barbican installation. The plugin will automatically load
+these tests into tempest.
 
-Please fill here a long description which must be at least 3 lines wrapped on
-80 cols, so that distribution package maintainers can use it in their packages.
-Note that this is a hard requirement.
+Dependencies
+------------
+The barbican_tempest_plugin tests the barbican quota API, which requires the
+existence of the 'key-manager:service-admin' role in barbican. The quota API
+tests will fail if this role is not defined.
 
-* Free software: Apache license
-* Documentation: http://docs.openstack.org/developer/barbican_tempest_plugin
-* Source: http://git.openstack.org/cgit/openstack/barbican_tempest_plugin
-* Bugs: http://bugs.launchpad.net/barbican
+Developers
+----------
+For more information on barbican, refer to:
+http://docs.openstack.org/developer/barbican/
 
-Features
---------
+For more information on tempest plugins, refer to:
+http://docs.openstack.org/developer/tempest/plugin.html#using-plugins
 
-* TODO
+Bugs
+----
+Please report bugs to: http://bugs.launchpad.net/barbican
