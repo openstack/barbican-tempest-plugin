@@ -13,11 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import decorators
+
 from barbican_tempest_plugin.tests.api import base
 
 
 class SecretMetadataTest(base.BaseKeyManagerTest):
     """Metadata API test"""
+    @decorators.idempotent_id('2b0c1707-afc3-4674-a6c6-4dc42f318117')
     def test_secret_metadata(self):
         # Create a secret
         sec = self.create_secret()

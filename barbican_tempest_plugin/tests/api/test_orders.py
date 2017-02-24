@@ -12,12 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest.lib import decorators
+
 from barbican_tempest_plugin.tests.api import base
 
 
 class OrdersTest(base.BaseKeyManagerTest):
     """Orders API tests."""
 
+    @decorators.idempotent_id('077c1729-1950-4e62-a29c-daba4aa186ad')
     def test_create_list_delete_orders(self):
         # Confirm that there are no orders
         body = self.order_client.list_orders()
