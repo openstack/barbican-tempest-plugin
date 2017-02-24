@@ -5,5 +5,4 @@
 pbr>=1.8 # Apache-2.0
 
 tempest>=12.1.0  # Apache-2.0
-tempest-lib>=0.14.0  # Apache-2.0
 cryptography!=1.3.0,>=1.0 # BSD/Apache-2.0
