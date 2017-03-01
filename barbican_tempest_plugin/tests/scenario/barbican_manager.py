@@ -38,7 +38,7 @@ LOG = logging.getLogger(__name__)
 
 class BarbicanScenarioTest(mgr.ScenarioTest):
 
-    credentials = ('primary', )
+    credentials = ('primary', 'admin')
     manager = clients.Manager()
 
     def setUp(self):
@@ -66,6 +66,7 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         super(BarbicanScenarioTest, cls).setup_clients()
 
         os = getattr(cls, 'os_%s' % cls.credentials[0])
+        os_adm = getattr(cls, 'os_%s' % cls.credentials[1])
         cls.consumer_client = os.secret_v1.ConsumerClient(
             service='key-manager'
         )
@@ -77,6 +78,18 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
+
+        if CONF.compute_feature_enabled.attach_encrypted_volume:
+            if CONF.volume_feature_enabled.api_v2:
+                cls.admin_volume_types_client =\
+                    os_adm.volume_types_v2_client
+                cls.admin_encryption_types_client =\
+                    os_adm.encryption_types_v2_client
+            else:
+                cls.admin_volume_types_client =\
+                    os_adm.volume_types_client
+                cls.admin_encryption_types_client =\
+                    os_adm.encryption_types_client
 
     def _get_uuid(self, href):
         return href.split('/')[-1]
@@ -156,3 +169,16 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         LOG.debug("Uploaded image %s", img_uuid)
 
         return img_uuid
+
+    def create_encryption_type(self, client=None, type_id=None, provider=None,
+                               key_size=None, cipher=None,
+                               control_location=None):
+        if not client:
+            client = self.admin_encryption_types_client
+        if not type_id:
+            volume_type = self.create_volume_type()
+            type_id = volume_type['id']
+        LOG.debug("Creating an encryption type for volume type: %s", type_id)
+        client.create_encryption_type(
+            type_id, provider=provider, key_size=key_size, cipher=cipher,
+            control_location=control_location)
