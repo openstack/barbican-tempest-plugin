@@ -22,16 +22,20 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from tempest.lib import decorators
+
 from barbican_tempest_plugin.tests.api import base
 
 
 class SecretsTest(base.BaseKeyManagerTest):
     """Secrets API tests."""
+    @decorators.idempotent_id('d5fb4ae4-c418-4405-9701-95fc6877aeb9')
     def test_create_delete_empty_secret(self):
         sec = self.create_secret()
         uuid = base._get_uuid(sec['secret_ref'])
         self.delete_secret(uuid)
 
+    @decorators.idempotent_id('9aee2ad3-5b61-4451-8ccc-a727bbe4618a')
     def test_create_delete_symmetric_key(self):
         password = b"password"
         salt = os.urandom(16)
@@ -50,6 +54,7 @@ class SecretsTest(base.BaseKeyManagerTest):
         uuid = base._get_uuid(sec['secret_ref'])
         self.delete_secret(uuid)
 
+    @decorators.idempotent_id('79ec555d-215d-4006-bcf0-ab4c6cb0b9ff')
     def test_list_secrets(self):
         # Create two secrets
         self.create_secret(name='secret_1')
@@ -64,6 +69,7 @@ class SecretsTest(base.BaseKeyManagerTest):
         secrets = resp['secrets']
         self.assertEqual('secret_2', secrets[0]['name'])
 
+    @decorators.idempotent_id('f5608620-f1f7-45a5-ac0a-e1c17d1f2f42')
     def test_get_secret_metadata(self):
         secret = self.create_secret()
         uuid = base._get_uuid(secret['secret_ref'])
@@ -71,6 +77,7 @@ class SecretsTest(base.BaseKeyManagerTest):
         self.assertEqual(uuid, base._get_uuid(resp['secret_ref']))
         self.delete_secret(uuid)
 
+    @decorators.idempotent_id('c5caa619-1e43-4724-8d94-a61ff7025a07')
     def test_get_and_put_payload(self):
         # Create secret without payload
         secret = self.create_secret()

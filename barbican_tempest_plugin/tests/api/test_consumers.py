@@ -12,12 +12,15 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from tempest.lib import decorators
+
 from barbican_tempest_plugin.tests.api import base
 
 
 class ConsumersTest(base.BaseKeyManagerTest):
     """Containers API tests."""
 
+    @decorators.idempotent_id('7d46a170-6b3b-4f4d-903a-b29aebb93289')
     def test_add_delete_consumers_in_container(self):
         # Create a container to test against
         body = self.create_container(

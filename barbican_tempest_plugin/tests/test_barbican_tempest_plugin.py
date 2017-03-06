@@ -19,10 +19,13 @@ test_barbican_tempest_plugin
 Tests for `barbican_tempest_plugin` module.
 """
 
+from tempest.lib import decorators
+
 from barbican_tempest_plugin.tests import base
 
 
 class TestBarbican_tempest_plugin(base.TestCase):
 
+    @decorators.idempotent_id('8abf6dec-37b9-43ca-95cf-b8ebecda3c8d')
     def test_something(self):
         pass

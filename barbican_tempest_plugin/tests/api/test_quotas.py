@@ -15,6 +15,7 @@
 from barbican_tempest_plugin.tests.api import base
 
 from tempest import config
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -22,6 +23,7 @@ CONF = config.CONF
 class QuotasTest(base.BaseKeyManagerTest):
     """Quotas API tests."""
 
+    @decorators.idempotent_id('47ebc42b-0e53-4060-b1a1-55bee2c7c43f')
     def test_create_get_delete_quota(self):
         # Verify the default quota settings
         body = self.quota_client.get_default_project_quota()
