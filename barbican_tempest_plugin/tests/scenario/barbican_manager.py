@@ -28,9 +28,9 @@ from cryptography.x509.oid import NameOID
 
 from oslo_log import log as logging
 from tempest import config
-from tempest.scenario import manager as mgr
 
 from barbican_tempest_plugin import clients
+from barbican_tempest_plugin.tests.scenario import manager as mgr
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
