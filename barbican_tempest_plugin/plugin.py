@@ -33,6 +33,11 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
         conf.register_opt(project_config.service_option,
                           group='service_available')
 
+        # Register ephemeral storage encryption options
+        conf.register_group(project_config.ephemeral_storage_encryption_group)
+        conf.register_opts(project_config.EphemeralStorageEncryptionGroup,
+                           project_config.ephemeral_storage_encryption_group)
+
     def get_opt_lists(self):
         return [('service_available', [project_config.service_option])]
 

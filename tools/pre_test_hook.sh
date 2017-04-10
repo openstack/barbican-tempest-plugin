@@ -11,10 +11,21 @@ export LOCALCONF_PATH=$DEVSTACK_DIR/local.conf
 # Here we can set some configurations for local.conf
 # for example, to pass some config options directly to .conf files
 
+# Set up LVM device
+echo -e '[[local|localrc]]' >> $LOCALCONF_PATH
+echo -e 'NOVA_BACKEND=LVM' >> $LOCALCONF_PATH
+echo -e 'LVM_VOLUME_CLEAR=none' >> $LOCALCONF_PATH
+
 # For image signature verification tests
 echo -e '[[post-config|$NOVA_CONF]]' >> $LOCALCONF_PATH
 echo -e '[glance]' >> $LOCALCONF_PATH
 echo -e 'verify_glance_signatures = True' >> $LOCALCONF_PATH
+
+# For ephemeral storage encryption tests
+echo -e '[ephemeral_storage_encryption]' >> $LOCALCONF_PATH
+echo -e 'key_size = 256' >> $LOCALCONF_PATH
+echo -e 'cipher = aes-xts-plain64' >> $LOCALCONF_PATH
+echo -e 'enabled = True' >> $LOCALCONF_PATH
 
 # Allow dynamically created tempest users to create secrets
 # in barbican
@@ -24,3 +35,7 @@ echo -e 'tempest_roles=creator' >> $LOCALCONF_PATH
 # Glance v1 doesn't do signature verification on image upload
 echo -e '[image-feature-enabled]' >> $LOCALCONF_PATH
 echo -e 'api_v1=False' >> $LOCALCONF_PATH
+
+# Enable ephemeral storage encryption in Tempest
+echo -e '[ephemeral_storage_encryption]' >> $LOCALCONF_PATH
+echo -e 'enabled = True' >> $LOCALCONF_PATH

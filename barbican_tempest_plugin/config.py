@@ -19,3 +19,27 @@ service_option = cfg.BoolOpt("barbican",
                              default=True,
                              help="Whether or not barbican is expected to be "
                                   "available")
+
+ephemeral_storage_encryption_group = cfg.OptGroup(
+    name="ephemeral_storage_encryption",
+    title="Ephemeral storage encryption options")
+
+EphemeralStorageEncryptionGroup = [
+    cfg.BoolOpt('enabled',
+                default=False,
+                help="Does the test environment support ephemeral storage "
+                     "encryption?"),
+    cfg.StrOpt('cipher',
+               default='aes-xts-plain64',
+               help="The cipher and mode used to encrypt ephemeral storage. "
+                    "AES-XTS is recommended by NIST specifically for disk "
+                    "storage, and the name is shorthand for AES encryption "
+                    "using the XTS encryption mode. Available ciphers depend "
+                    "on kernel support. At the command line, type "
+                    "'cryptsetup benchmark' to determine the available "
+                    "options (and see benchmark results), or go to "
+                    "/proc/crypto."),
+    cfg.IntOpt('key_size',
+               default=256,
+               help="The key size used to encrypt ephemeral storage."),
+]
