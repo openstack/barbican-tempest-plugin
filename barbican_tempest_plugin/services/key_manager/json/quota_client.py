@@ -32,21 +32,21 @@ class QuotaClient(rest_client.RestClient):
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def get_default_project_quota(self):
         uri = "v1/quotas"
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def get_project_quota(self, project_id):
         uri = "v1/project-quotas/%s" % project_id
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def create_project_quota(self, project_id, **kwargs):
         uri = "v1/project-quotas/%s" % project_id

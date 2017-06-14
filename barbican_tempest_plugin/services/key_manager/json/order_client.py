@@ -32,21 +32,21 @@ class OrderClient(rest_client.RestClient):
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def create_order(self, **kwargs):
         uri = "/v1/orders"
 
         response, body = self.post(uri, json.dumps(kwargs))
         self.expected_success(202, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def get_order(self, order_id):
         uri = "v1/orders/%s" % order_id
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def delete_order(self, order_id):
         uri = "/v1/orders/%s" % order_id

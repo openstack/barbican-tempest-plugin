@@ -32,21 +32,21 @@ class ContainerClient(rest_client.RestClient):
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def get_container(self, container_id):
         uri = "v1/containers/%s" % container_id
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def create_container(self, **kwargs):
         uri = "v1/containers"
 
         response, body = self.post(uri, json.dumps(kwargs))
         self.expected_success(201, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def delete_container(self, container_id):
         uri = "v1/containers/%s" % container_id
@@ -67,7 +67,7 @@ class ContainerClient(rest_client.RestClient):
             json.dumps(kwargs)
         )
         self.expected_success(201, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def delete_secret_from_container(self, container_id, secret_id, **kwargs):
         uri = "v1/containers/%s/secrets" % container_id
