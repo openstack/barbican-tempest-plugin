@@ -32,18 +32,18 @@ class ConsumerClient(rest_client.RestClient):
 
         response, body = self.get(uri)
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def add_consumer_to_container(self, container_id, **kwargs):
         uri = "/v1/containers/%s/consumers" % container_id
 
         response, body = self.post(uri, json.dumps(kwargs))
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
 
     def delete_consumer_from_container(self, container_id, **kwargs):
         uri = "/v1/containers/%s/consumers" % container_id
 
         response, body = self.delete(uri, body=json.dumps(kwargs))
         self.expected_success(200, response.status)
-        return json.loads(body)
+        return json.loads(body.decode("utf-8"))
