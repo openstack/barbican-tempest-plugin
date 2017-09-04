@@ -13,10 +13,10 @@
 # under the License.
 
 from oslo_log import log as logging
+from tempest.common import utils
 from tempest import config
 from tempest import exceptions
 from tempest.lib import decorators
-from tempest import test
 
 from barbican_tempest_plugin.tests.scenario import barbican_manager
 
@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
 
     @decorators.idempotent_id('4343df3c-5553-40ea-8705-0cce73b297a9')
-    @test.services('compute', 'image')
+    @utils.services('compute', 'image')
     def test_signed_image_upload_and_boot(self):
         """Test that Nova boots a signed image.
 
@@ -49,7 +49,7 @@ class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
         self.servers_client.delete_server(instance['id'])
 
     @decorators.idempotent_id('74f022d6-a6ef-4458-96b7-541deadacf99')
-    @test.services('compute', 'image')
+    @utils.services('compute', 'image')
     def test_signed_image_upload_boot_failure(self):
         """Test that Nova refuses to boot an incorrectly signed image.
 

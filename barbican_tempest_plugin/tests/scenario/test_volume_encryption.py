@@ -13,9 +13,9 @@
 # under the License.
 
 from oslo_log import log as logging
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 from barbican_tempest_plugin.tests.scenario import barbican_manager
 
@@ -76,7 +76,7 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         self.nova_volume_detach(server, attached_volume)
 
     @decorators.idempotent_id('89165fb4-5534-4b9d-8429-97ccffb8f86f')
-    @test.services('compute', 'volume', 'image')
+    @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luks(self):
         img_uuid = self.sign_and_upload_image()
         LOG.info("Creating keypair and security group")
@@ -95,7 +95,7 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         self.attach_detach_volume(server, volume, keypair)
 
     @decorators.idempotent_id('cbc752ed-b716-4727-910f-956ccf965723')
-    @test.services('compute', 'volume', 'image')
+    @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_cryptsetup(self):
         img_uuid = self.sign_and_upload_image()
         LOG.info("Creating keypair and security group")

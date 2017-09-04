@@ -13,9 +13,9 @@
 # under the License.
 
 from oslo_log import log as logging
+from tempest.common import utils
 from tempest import config
 from tempest.lib import decorators
-from tempest import test
 
 from barbican_tempest_plugin.tests.scenario import barbican_manager
 
@@ -42,7 +42,7 @@ class EphemeralStorageEncryptionTest(barbican_manager.BarbicanScenarioTest):
                 'Ephemeral storage encryption is not supported')
 
     @decorators.idempotent_id('afe720b9-8b35-4a3c-8ff3-15841c2d3148')
-    @test.services('compute', 'image')
+    @utils.services('compute', 'image')
     def test_encrypted_ephemeral_lvm_storage(self):
         test_string = 'Once upon a time ...'
         client_test_path = '/tmp/ephemeral_disk_encryption_test'
