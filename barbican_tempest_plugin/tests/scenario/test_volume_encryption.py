@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 from tempest.common import utils
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib import decorators
 
 from barbican_tempest_plugin.tests.scenario import barbican_manager
@@ -24,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 
 class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
+    min_microversion = '2.1'
 
     """The test suite for encrypted cinder volumes
 
@@ -44,6 +46,14 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         super(VolumeEncryptionTest, cls).skip_checks()
         if not CONF.compute_feature_enabled.attach_encrypted_volume:
             raise cls.skipException('Encrypted volume attach is not supported')
+
+    @classmethod
+    def resource_setup(cls):
+        super(VolumeEncryptionTest, cls).resource_setup()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.compute.min_microversion))
 
     def create_encrypted_volume(self, encryption_provider, volume_type):
         volume_type = self.create_volume_type(name=volume_type)
@@ -103,7 +113,6 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
         security_group = self._create_security_group()
-
         server = self.create_server(
             name='signed_img_server',
             image_id=img_uuid,

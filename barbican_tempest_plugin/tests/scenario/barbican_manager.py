@@ -28,30 +28,49 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 
 from oslo_log import log as logging
+from tempest.api.compute import api_microversion_fixture
 from tempest import config
 
 from barbican_tempest_plugin.tests.scenario import manager as mgr
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
+COMPUTE_MICROVERSION = CONF.compute.min_microversion
 
 
 class BarbicanScenarioTest(mgr.ScenarioTest):
 
+    api_microversion_header_name = 'X-OpenStack-Nova-API-Version'
     credentials = ('primary', 'admin')
+
+    def get_headers(self):
+        headers = super(BarbicanScenarioTest, self).get_headers()
+        if COMPUTE_MICROVERSION:
+            headers[self.api_microversion_header_name] = COMPUTE_MICROVERSION
+        return headers
 
     def setUp(self):
         super(BarbicanScenarioTest, self).setUp()
+        self.useFixture(api_microversion_fixture.APIMicroversionFixture(
+            self.request_microversion))
         self.img_file = os.path.join(CONF.scenario.img_dir,
                                      CONF.scenario.img_file)
         self.private_key = rsa.generate_private_key(public_exponent=3,
                                                     key_size=1024,
                                                     backend=default_backend())
         self.signing_certificate = self._create_self_signed_certificate(
-            self.private_key
+            self.private_key,
+            u"Test Certificate"
         )
         self.signing_cert_uuid = self._store_cert(
             self.signing_certificate
+        )
+        self.bad_signing_certificate = self._create_self_signed_certificate(
+            self.private_key,
+            u"Bad Certificate"
+        )
+        self.bad_cert_uuid = self._store_cert(
+            self.bad_signing_certificate
         )
 
     @classmethod
@@ -89,20 +108,40 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
     def _get_uuid(self, href):
         return href.split('/')[-1]
 
-    def _create_self_signed_certificate(self, private_key):
+    def _create_self_signed_certificate(self, private_key, common_name):
         issuer = x509.Name([
             x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
             x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"CA"),
             x509.NameAttribute(NameOID.LOCALITY_NAME, u"San Francisco"),
             x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"My Company"),
-            x509.NameAttribute(NameOID.COMMON_NAME, u"Test Certificate"),
+            x509.NameAttribute(NameOID.COMMON_NAME, common_name),
         ])
         cert_builder = x509.CertificateBuilder(
-            issuer_name=issuer, subject_name=issuer,
+            issuer_name=issuer,
+            subject_name=issuer,
             public_key=private_key.public_key(),
             serial_number=x509.random_serial_number(),
             not_valid_before=datetime.utcnow(),
             not_valid_after=datetime.utcnow() + timedelta(days=10)
+        ).add_extension(
+            x509.BasicConstraints(
+                ca=True,
+                path_length=1
+            ),
+            critical=True
+        ).add_extension(
+            x509.KeyUsage(
+                digital_signature=True,
+                content_commitment=True,
+                key_encipherment=False,
+                data_encipherment=False,
+                key_agreement=False,
+                key_cert_sign=True,
+                crl_sign=False,
+                encipher_only=False,
+                decipher_only=False
+            ),
+            critical=False
         )
         cert = cert_builder.sign(private_key,
                                  hashes.SHA256(),
