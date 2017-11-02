@@ -1,0 +1,11 @@
+- project:
+    name: openstack/barbican-tempest-plugin
+    check:
+      jobs:
+        - barbican-simple-crypto-devstack-tempest
+    gate:
+      jobs:
+        - barbican-simple-crypto-devstack-tempest
+    experimental:
+      jobs:
+        - barbican-simple-crypto-devstack-tempest-py35
