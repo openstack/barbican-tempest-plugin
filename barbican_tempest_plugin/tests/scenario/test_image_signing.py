@@ -13,6 +13,7 @@
 # under the License.
 
 from oslo_log import log as logging
+from tempest.api.compute import base as compute_base
 from tempest.common import utils
 from tempest import config
 from tempest import exceptions
@@ -81,3 +82,51 @@ class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
                                "Signature verification for the image failed",
                                self.create_server,
                                image_id=img_uuid)
+
+
+class ImageSigningSnapshotTest(barbican_manager.BarbicanScenarioTest,
+                               compute_base.BaseV2ComputeTest):
+
+    @classmethod
+    def setup_clients(cls):
+        super(ImageSigningSnapshotTest, cls).setup_clients()
+        cls.client = cls.servers_client
+
+    @decorators.idempotent_id('f0603dfd-8b2c-44e2-8b0f-d65c87aab257')
+    @utils.services('compute', 'image')
+    def test_signed_image_upload_boot_snapshot(self):
+        """Test that Glance can snapshot an instance using a signed image.
+
+        Verify that a snapshot can be taken of an instance booted from a signed
+        image and that the resulting snapshot image has had all image signature
+        properties dropped from the original image.
+
+        The test follows these steps:
+            * Create an asymmetric keypair
+            * Sign an image file with the private key
+            * Create a certificate with the public key
+            * Store the certificate in Barbican
+            * Store the signed image in Glance
+            * Boot the signed image
+            * Confirm the instance changes state to Active
+            * Snapshot the running instance
+            * Uploading the snapshot and confirm the state moves to ACTIVE
+        """
+        img_uuid = self.sign_and_upload_image()
+        instance = self.create_server(name='signed_img_server_to_snapshot',
+                                      image_id=img_uuid,
+                                      wait_until='ACTIVE')
+
+        # Snapshot the instance, wait until the snapshot is active
+        image = self.create_image_from_server(instance['id'],
+                                              wait_until='ACTIVE')
+
+        # Ensure all img_signature image props have been dropped
+        signature_props = ['img_signature_hash_method',
+                           'img_signature',
+                           'img_signature_key_type',
+                           'img_signature_certificate_uuid']
+        img_meta = self.compute_images_client.list_image_metadata(image['id'])
+        self.assertFalse(any(x in img_meta for x in signature_props))
+
+        self.servers_client.delete_server(instance['id'])
