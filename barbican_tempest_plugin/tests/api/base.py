@@ -69,6 +69,8 @@ class BaseKeyManagerTest(test.BaseTestCase,
     @classmethod
     def skip_checks(cls):
         super().skip_checks()
+        if not CONF.service_available.barbican:
+            raise cls.skipException('Barbican is not enabled.')
         api_version_utils.check_skip_with_microversion(
             cls.min_microversion,
             cls.max_microversion,
