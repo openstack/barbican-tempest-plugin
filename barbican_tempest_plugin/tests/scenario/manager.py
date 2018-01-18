@@ -32,7 +32,9 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-class ScenarioTest(manager.ScenarioTest):
+# we inherit from NetworkScenarioTest since some test cases need access to
+# check_*_connectivity methods to validate instances are up and accessible
+class ScenarioTest(manager.NetworkScenarioTest):
     """Base class for scenario tests. Uses tempest own clients. """
 
     credentials = ['primary']

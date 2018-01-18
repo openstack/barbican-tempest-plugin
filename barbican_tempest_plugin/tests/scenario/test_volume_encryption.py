@@ -55,17 +55,11 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         return self.create_volume(volume_type=volume_type['name'])
 
     def attach_detach_volume(self, server, volume, keypair):
-        # test if server is accessible
-        server_ip = self.get_server_ip(server)
-        self.get_remote_client(
-            server_ip,
-            private_key=keypair['private_key']
-        )
-
         # Attach volume
         attached_volume = self.nova_volume_attach(server, volume)
 
         # Write a timestamp to volume
+        server_ip = self.get_server_ip(server)
         timestamp = self.create_timestamp(
             server_ip,
             dev_name=CONF.compute.volume_device_name,
@@ -95,6 +89,11 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
             security_groups=[{'name': security_group['name']}],
             wait_until='ACTIVE'
         )
+
+        # check that instance is accessible before messing with its disks
+        self.check_tenant_network_connectivity(
+            server, CONF.validation.image_ssh_user, keypair['private_key'])
+
         volume = self.create_encrypted_volume('nova.volume.encryptors.'
                                               'luks.LuksEncryptor',
                                               volume_type='luks')
@@ -115,6 +114,11 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
             security_groups=[{'name': security_group['name']}],
             wait_until='ACTIVE'
         )
+
+        # check that instance is accessible before messing with its disks
+        self.check_tenant_network_connectivity(
+            server, CONF.validation.image_ssh_user, keypair['private_key'])
+
         volume = self.create_encrypted_volume('nova.volume.encryptors.'
                                               'cryptsetup.CryptsetupEncryptor',
                                               volume_type='cryptsetup')
