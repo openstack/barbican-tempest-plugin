@@ -25,14 +25,14 @@ from tempest import exceptions
 from tempest.lib.common.utils import data_utils
 from tempest.lib.common.utils import test_utils
 from tempest.lib import exceptions as lib_exc
-import tempest.test
+from tempest.scenario import manager
 
 CONF = config.CONF
 
 LOG = log.getLogger(__name__)
 
 
-class ScenarioTest(tempest.test.BaseTestCase):
+class ScenarioTest(manager.ScenarioTest):
     """Base class for scenario tests. Uses tempest own clients. """
 
     credentials = ['primary']
