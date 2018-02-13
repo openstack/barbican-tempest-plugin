@@ -35,7 +35,3 @@ echo -e 'tempest_roles=creator' >> $LOCALCONF_PATH
 # Glance v1 doesn't do signature verification on image upload
 echo -e '[image-feature-enabled]' >> $LOCALCONF_PATH
 echo -e 'api_v1=False' >> $LOCALCONF_PATH
-
-# Enable ephemeral storage encryption in Tempest
-echo -e '[ephemeral_storage_encryption]' >> $LOCALCONF_PATH
-echo -e 'enabled = True' >> $LOCALCONF_PATH
