@@ -21,6 +21,7 @@ import os
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.asymmetric import utils
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives import serialization
 from cryptography import x509
@@ -131,20 +132,22 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
 
     def _sign_image(self, image_file):
         LOG.debug("Creating signature for image data")
-        signer = self.private_key.signer(
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
+        hasher = hashes.Hash(hashes.SHA256(), default_backend())
         chunk_bytes = 8192
         with open(image_file, 'rb') as f:
             chunk = f.read(chunk_bytes)
             while len(chunk) > 0:
-                signer.update(chunk)
+                hasher.update(chunk)
                 chunk = f.read(chunk_bytes)
-        signature = signer.finalize()
+        digest = hasher.finalize()
+        signature = self.private_key.sign(
+            digest,
+            padding.PSS(
+                mgf=padding.MGF1(hashes.SHA256()),
+                salt_length=padding.PSS.MAX_LENGTH
+            ),
+            utils.Prehashed(hashes.SHA256())
+        )
         signature_b64 = base64.b64encode(signature)
         return signature_b64
 
