@@ -333,6 +333,7 @@ class ScenarioTest(manager.NetworkScenarioTest):
         waiters.wait_for_volume_resource_status(self.volumes_client,
                                                 volume['id'], 'in-use')
 
+        self.addCleanup(self.nova_volume_detach, server, volume)
         # Return the updated volume after the attachment
         return self.volumes_client.show_volume(volume['id'])['volume']
 

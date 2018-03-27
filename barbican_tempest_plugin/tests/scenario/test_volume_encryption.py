@@ -56,7 +56,7 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
 
     def attach_detach_volume(self, server, volume, keypair):
         # Attach volume
-        attached_volume = self.nova_volume_attach(server, volume)
+        self.nova_volume_attach(server, volume)
 
         # Write a timestamp to volume
         server_ip = self.get_server_ip(server)
@@ -71,9 +71,6 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
             private_key=keypair['private_key']
         )
         self.assertEqual(timestamp, timestamp2)
-
-        # Detach volume
-        self.nova_volume_detach(server, attached_volume)
 
     @decorators.idempotent_id('89165fb4-5534-4b9d-8429-97ccffb8f86f')
     @utils.services('compute', 'volume', 'image')
