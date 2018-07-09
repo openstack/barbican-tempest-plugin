@@ -6,7 +6,7 @@
 *.sqlite
 *.swp
 .coverage
-.testrepository
+.stestr/
 .tox
 .venv
 .idea
