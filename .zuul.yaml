@@ -1,8 +1,12 @@
 - project:
+    templates:
+      - tempest-plugin-jobs
+      - check-requirements
     check:
       jobs:
         - barbican-simple-crypto-devstack-tempest
     gate:
+      queue: barbican
       jobs:
         - barbican-simple-crypto-devstack-tempest
     experimental:
