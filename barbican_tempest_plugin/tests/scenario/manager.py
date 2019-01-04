@@ -396,8 +396,9 @@ class ScenarioTest(manager.NetworkScenarioTest):
                 addresses = (server['addresses'][network['name']]
                              if network else [])
             for address in addresses:
-                if (address['version'] == CONF.validation.ip_version_for_ssh
-                        and address['OS-EXT-IPS:type'] == 'fixed'):
+                ip_version_for_ssh = CONF.validation.ip_version_for_ssh
+                if (address['version'] == ip_version_for_ssh and
+                        address['OS-EXT-IPS:type'] == 'fixed'):
                     return address['addr']
             raise exceptions.ServerUnreachable(server_id=server['id'])
         else:

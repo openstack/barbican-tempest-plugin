@@ -27,6 +27,7 @@
       devstack_plugins:
         barbican: https://opendev.org/openstack/barbican
       devstack_localrc:
+        USE_PYTHON3: true
         NOVA_BACKEND: LVM
         LVM_VOLUME_CLEAR: none
       devstack_local_conf:
