@@ -43,3 +43,14 @@ EphemeralStorageEncryptionGroup = [
                default=256,
                help="The key size used to encrypt ephemeral storage."),
 ]
+
+image_signature_verification_group = cfg.OptGroup(
+    name="image_signature_verification",
+    title="Image Signature Verification Options")
+
+ImageSignatureVerificationGroup = [
+    cfg.BoolOpt('enforced',
+                default=True,
+                help="Does the test environment enforce glance image "
+                     "verification?"),
+]
