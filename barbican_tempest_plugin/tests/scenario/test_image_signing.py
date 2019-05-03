@@ -70,6 +70,10 @@ class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
             * Attempt to boot the incorrectly signed image
             * Confirm an exception is thrown
         """
+        if not CONF.image_signature_verification.enforced:
+            raise self.skipException("Image signature verification is not "
+                                     "enforced in this environment")
+
         img_uuid = self.sign_and_upload_image()
 
         LOG.debug("Modifying image signature to be incorrect")
