@@ -15,10 +15,10 @@ tests will fail if this role is not defined.
 Developers
 ----------
 For more information on barbican, refer to:
-http://docs.openstack.org/developer/barbican/
+https://docs.openstack.org/barbican/latest/
 
 For more information on tempest plugins, refer to:
-http://docs.openstack.org/developer/tempest/plugin.html#using-plugins
+https://docs.openstack.org/tempest/latest/#using-plugins
 
 Bugs
 ----
