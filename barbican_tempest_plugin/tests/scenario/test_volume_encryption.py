@@ -91,8 +91,7 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         self.check_tenant_network_connectivity(
             server, CONF.validation.image_ssh_user, keypair['private_key'])
 
-        volume = self.create_encrypted_volume('nova.volume.encryptors.'
-                                              'luks.LuksEncryptor',
+        volume = self.create_encrypted_volume('luks',
                                               volume_type='luks')
         self.attach_detach_volume(server, volume, keypair)
 
