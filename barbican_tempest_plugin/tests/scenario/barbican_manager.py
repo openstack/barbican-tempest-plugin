@@ -53,8 +53,21 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         super(BarbicanScenarioTest, self).setUp()
         self.useFixture(api_microversion_fixture.APIMicroversionFixture(
             self.request_microversion))
-        self.img_file = os.path.join(CONF.scenario.img_dir,
-                                     CONF.scenario.img_file)
+        self.img_file = CONF.scenario.img_file
+        if not os.path.exists(self.img_file):
+            # TODO(kopecmartin): replace LOG.warning for rasing
+            # InvalidConfiguration exception after tempest 25.0.0 is
+            # released - there will be one release which accepts both
+            # behaviors in order to avoid many failures across CIs and etc.
+            LOG.warning(
+                'Starting Tempest 25.0.0 release, CONF.scenario.img_file need '
+                'a full path for the image. CONF.scenario.img_dir was '
+                'deprecated and will be removed in the next release. Till '
+                'Tempest 25.0.0, old behavior is maintained and keep working '
+                'but starting Tempest 26.0.0, you need to specify the full '
+                'path in CONF.scenario.img_file config option.')
+            self.img_file = os.path.join(CONF.scenario.img_dir, self.img_file)
+
         self.private_key = rsa.generate_private_key(public_exponent=3,
                                                     key_size=1024,
                                                     backend=default_backend())
