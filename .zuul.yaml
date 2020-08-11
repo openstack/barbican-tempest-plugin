@@ -4,11 +4,83 @@
       - check-requirements
     check:
       jobs:
-        - barbican-simple-crypto-devstack-tempest
+        - barbican-tempest-plugin-simple-crypto
+        - barbican-tempest-plugin-simple-crypto-ussuri
+        - barbican-tempest-plugin-simple-crypto-train
+        - barbican-tempest-plugin-simple-crypto-stein
+        - barbican-tempest-plugin-simple-crypto-ipv6-only
+        - barbican-tempest-plugin-simple-crypto-castellan-src
+        - barbican-tempest-plugin-simple-crypto-cursive
     gate:
       queue: barbican
       jobs:
-        - barbican-simple-crypto-devstack-tempest
-    experimental:
-      jobs:
-        - barbican-simple-crypto-devstack-tempest-py35
+        - barbican-tempest-plugin-simple-crypto
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto
+    parent: devstack-tempest
+    required-projects: &barbican-tempest-reqs
+      - opendev.org/openstack/barbican
+      - opendev.org/openstack/barbican-tempest-plugin
+      - opendev.org/openstack/python-barbicanclient
+    vars: &barbican-tempest-vars
+      devstack_plugins:
+        barbican: https://opendev.org/openstack/barbican
+      devstack_localrc:
+        NOVA_BACKEND: LVM
+        LVM_VOLUME_CLEAR: none
+      devstack_local_conf:
+        post-config:
+          $NOVA_CONF:
+            glance:
+              verify_glance_signatures: True
+            ephemeral_storage_encryption:
+              key_size: 256
+              cipher: aes-xts-plain64
+              enabled: True
+        test-config:
+          $TEMPEST_CONFIG:
+            auth:
+              tempest_roles: creator
+            image-feature-enabled:
+              # this may be removed soon, as api_v1 is false since tempest>=20
+              api_v1: False
+            ephemeral_storage_encryption:
+              enabled: True
+      tox_envlist: all
+      tempest_test_regex: barbican
+      tempest_plugins:
+        - barbican-tempest-plugin
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ussuri
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/ussuri
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-train
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/train
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-stein
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/stein
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only
+    parent: devstack-tempest-ipv6
+    required-projects: *barbican-tempest-reqs
+    vars: *barbican-tempest-vars
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-castellan-src
+    parent: barbican-tempest-plugin-simple-crypto
+    required-projects:
+      - opendev.org/openstack/castellan
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-cursive
+    parent: barbican-tempest-plugin-simple-crypto
+    required-projects:
+      - opendev.org/x/cursive
