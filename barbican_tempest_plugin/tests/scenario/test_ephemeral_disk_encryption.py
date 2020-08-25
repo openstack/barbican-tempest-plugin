@@ -15,6 +15,7 @@
 from oslo_log import log as logging
 from tempest.common import utils
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest.lib import decorators
 
 from barbican_tempest_plugin.tests.scenario import barbican_manager
@@ -24,6 +25,7 @@ LOG = logging.getLogger(__name__)
 
 
 class EphemeralStorageEncryptionTest(barbican_manager.BarbicanScenarioTest):
+    min_microversion = '2.1'
 
     """The test suite for encrypted ephemeral storage
 
@@ -40,6 +42,14 @@ class EphemeralStorageEncryptionTest(barbican_manager.BarbicanScenarioTest):
         if not CONF.ephemeral_storage_encryption.enabled:
             raise cls.skipException(
                 'Ephemeral storage encryption is not supported')
+
+    @classmethod
+    def resource_setup(cls):
+        super(EphemeralStorageEncryptionTest, cls).resource_setup()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.compute.min_microversion))
 
     @decorators.idempotent_id('afe720b9-8b35-4a3c-8ff3-15841c2d3148')
     @utils.services('compute', 'image')

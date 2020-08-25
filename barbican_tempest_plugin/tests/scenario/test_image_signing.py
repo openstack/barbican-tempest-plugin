@@ -17,6 +17,7 @@ from tempest.api.compute import base as compute_base
 from tempest.common import utils
 from tempest import config
 from tempest import exceptions
+from tempest.lib.common import api_version_utils
 from tempest.lib import decorators
 
 from barbican_tempest_plugin.tests.scenario import barbican_manager
@@ -26,6 +27,15 @@ LOG = logging.getLogger(__name__)
 
 
 class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
+    min_microversion = '2.1'
+
+    @classmethod
+    def resource_setup(cls):
+        super(ImageSigningTest, cls).resource_setup()
+        cls.request_microversion = (
+            api_version_utils.select_request_microversion(
+                cls.min_microversion,
+                CONF.compute.min_microversion))
 
     @decorators.idempotent_id('4343df3c-5553-40ea-8705-0cce73b297a9')
     @utils.services('compute', 'image')
@@ -77,10 +87,8 @@ class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
         img_uuid = self.sign_and_upload_image()
 
         LOG.debug("Modifying image signature to be incorrect")
-        metadata = {'img_signature': 'fake_signature'}
-        self.compute_images_client.update_image_metadata(
-            img_uuid, metadata
-        )
+        patch = [dict(replace='/img_signature', value='fake_signature')]
+        self.image_client.update_image(image_id=img_uuid, patch=patch)
 
         self.assertRaisesRegex(exceptions.BuildErrorException,
                                "Signature verification for the image failed",

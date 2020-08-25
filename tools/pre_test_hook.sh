@@ -32,6 +32,7 @@ echo -e 'enabled = True' >> $LOCALCONF_PATH
 echo -e '[[test-config|$TEMPEST_CONFIG]]' >> $LOCALCONF_PATH
 echo -e '[auth]' >> $LOCALCONF_PATH
 echo -e 'tempest_roles=creator' >> $LOCALCONF_PATH
+
 # Glance v1 doesn't do signature verification on image upload
 echo -e '[image-feature-enabled]' >> $LOCALCONF_PATH
 echo -e 'api_v1=False' >> $LOCALCONF_PATH
