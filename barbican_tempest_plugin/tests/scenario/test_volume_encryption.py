@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import testtools
+
 from oslo_log import log as logging
 from tempest.common import utils
 from tempest import config
@@ -105,6 +107,8 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
                                               volume_type='luks')
         self.attach_detach_volume(server, volume, keypair)
 
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'PLAIN encryptor provider is not supported on rbd')
     @decorators.idempotent_id('cbc752ed-b716-4727-910f-956ccf965723')
     @utils.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_cryptsetup(self):
