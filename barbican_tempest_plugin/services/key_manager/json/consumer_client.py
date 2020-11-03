@@ -15,7 +15,7 @@
 
 import json
 
-from six.moves.urllib import parse as urllib
+from urllib import parse as urllib
 
 from tempest import config
 from tempest.lib.common import rest_client
