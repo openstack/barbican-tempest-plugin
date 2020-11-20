@@ -290,6 +290,27 @@ class ScenarioTest(manager.NetworkScenarioTest):
                 self.image_client.update_image(image['id'], data=image_file)
             else:
                 self.image_client.store_image_file(image['id'], image_file)
+
+        if CONF.image_feature_enabled.import_image:
+            available_stores = []
+            try:
+                available_stores = self.image_client.info_stores()['stores']
+            except exceptions.NotFound:
+                pass
+            available_import_methods = self.image_client.info_import()[
+                'import-methods']['value']
+            if ('copy-image' in available_import_methods and
+                    len(available_stores) > 1):
+                self.image_client.image_import(image['id'],
+                                               method='copy-image',
+                                               all_stores=True,
+                                               all_stores_must_succeed=False)
+                failed_stores = waiters.wait_for_image_copied_to_stores(
+                    self.image_client, image['id'])
+                self.assertEqual(0, len(failed_stores),
+                                 "Failed to copy the following stores: %s" %
+                                 str(failed_stores))
+
         return image['id']
 
     def rebuild_server(self, server_id, image=None,
