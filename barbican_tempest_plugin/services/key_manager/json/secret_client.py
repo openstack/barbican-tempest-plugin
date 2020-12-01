@@ -15,7 +15,6 @@
 
 
 import json
-import six
 
 from tempest import config
 from tempest.lib.common import rest_client
@@ -29,7 +28,7 @@ class SecretClient(rest_client.RestClient):
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name("tempest-sec")
 
-        if 'payload' in kwargs and type(kwargs['payload']) is six.binary_type:
+        if 'payload' in kwargs and type(kwargs['payload']) is bytes:
             kwargs['payload'] = kwargs['payload'].decode('utf-8')
 
         post_body = kwargs
