@@ -54,3 +54,14 @@ ImageSignatureVerificationGroup = [
                 help="Does the test environment enforce glance image "
                      "verification?"),
 ]
+
+barbican_rbac_scope_verification_group = cfg.OptGroup(
+    name="barbican_rbac_scope_verification",
+    title="Barbican RBAC Verification Options")
+
+BarbicanRBACScopeVerificationGroup = [
+    cfg.BoolOpt('enforce_scope',
+                default=False,
+                help="Does barbican enforce scope and user "
+                     "scope-aware policies?"),
+]

@@ -84,6 +84,11 @@ class BaseKeyManagerTest(test.BaseTestCase):
         cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')
 
     @classmethod
+    def setup_credentials(cls):
+        super().setup_credentials()
+        cls.os_primary = getattr(cls, f'os_{cls.credentials[0]}')
+
+    @classmethod
     def resource_setup(cls):
         super(BaseKeyManagerTest, cls).resource_setup()
         for resource in RESOURCE_TYPES:
