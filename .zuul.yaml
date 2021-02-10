@@ -5,9 +5,9 @@
     check:
       jobs:
         - barbican-tempest-plugin-simple-crypto
+        - barbican-tempest-plugin-simple-crypto-victoria
         - barbican-tempest-plugin-simple-crypto-ussuri
         - barbican-tempest-plugin-simple-crypto-train
-        - barbican-tempest-plugin-simple-crypto-stein
         - barbican-tempest-plugin-simple-crypto-ipv6-only
         - barbican-tempest-plugin-simple-crypto-castellan-src
         - barbican-tempest-plugin-simple-crypto-cursive
@@ -27,7 +27,6 @@
       devstack_plugins:
         barbican: https://opendev.org/openstack/barbican
       devstack_localrc:
-        USE_PYTHON3: true
         NOVA_BACKEND: LVM
         LVM_VOLUME_CLEAR: none
       devstack_local_conf:
@@ -54,19 +53,22 @@
         - barbican-tempest-plugin
 
 - job:
+    name: barbican-tempest-plugin-simple-crypto-victoria
+    parent: barbican-tempest-plugin-simple-crypto
+    nodeset: openstack-single-node-bionic
+    override-checkout: stable/victoria
+
+- job:
     name: barbican-tempest-plugin-simple-crypto-ussuri
     parent: barbican-tempest-plugin-simple-crypto
+    nodeset: openstack-single-node-bionic
     override-checkout: stable/ussuri
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-train
     parent: barbican-tempest-plugin-simple-crypto
+    nodeset: openstack-single-node-bionic
     override-checkout: stable/train
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-stein
-    parent: barbican-tempest-plugin-simple-crypto
-    override-checkout: stable/stein
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only
