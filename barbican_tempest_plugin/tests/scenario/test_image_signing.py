@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import testtools
 
 from oslo_log import log as logging
 from tempest.api.compute import base as compute_base
@@ -61,6 +62,8 @@ class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
 
     @decorators.idempotent_id('74f022d6-a6ef-4458-96b7-541deadacf99')
     @utils.services('compute', 'image')
+    @testtools.skipUnless(CONF.image_signature_verification.enforced,
+                          "Image signature verification is not enforced")
     def test_signed_image_upload_boot_failure(self):
         """Test that Nova refuses to boot an incorrectly signed image.
 
@@ -80,9 +83,6 @@ class ImageSigningTest(barbican_manager.BarbicanScenarioTest):
             * Attempt to boot the incorrectly signed image
             * Confirm an exception is thrown
         """
-        if not CONF.image_signature_verification.enforced:
-            raise self.skipException("Image signature verification is not "
-                                     "enforced in this environment")
 
         img_uuid = self.sign_and_upload_image()
 
