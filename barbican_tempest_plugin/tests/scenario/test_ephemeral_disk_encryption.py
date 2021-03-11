@@ -42,6 +42,11 @@ class EphemeralStorageEncryptionTest(barbican_manager.BarbicanScenarioTest):
         if not CONF.ephemeral_storage_encryption.enabled:
             raise cls.skipException(
                 'Ephemeral storage encryption is not supported')
+        if not CONF.auth.create_isolated_networks:
+            # FIXME(redorobt): remove this skip when system-scope admin
+            # issue is fixed.
+            raise cls.skipException(
+                'Ephemeral storage encryption requires isolated networks')
 
     @classmethod
     def resource_setup(cls):

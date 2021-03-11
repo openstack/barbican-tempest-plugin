@@ -5,6 +5,7 @@
     check:
       jobs:
         - barbican-tempest-plugin-simple-crypto
+        - barbican-tempest-plugin-simple-crypto-secure-rbac
         - barbican-tempest-plugin-simple-crypto-victoria
         - barbican-tempest-plugin-simple-crypto-ussuri
         - barbican-tempest-plugin-simple-crypto-train
@@ -51,6 +52,29 @@
       tempest_test_regex: barbican
       tempest_plugins:
         - barbican-tempest-plugin
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac
+    parent: barbican-tempest-plugin-simple-crypto
+    vars:
+      devstack_local_conf:
+        post-config:
+          $BARBICAN_CONF:
+            oslo_policy:
+              enforce_new_defaults: True
+        test-config:
+          $TEMPEST_CONFIG:
+            # FIXME(redrobot): Tempest errors out when you try to create a
+            # system-scope admin because of a neutron client issue where a
+            # tenant_id is required.
+            # To work around that issue we disable create_isolate_networks
+            # here, and we also skip a lot of tests that require that feature.
+            # We should be able to re-enable this once Tempest is fixed.
+            # See: https://review.opendev.org/c/openstack/tempest/+/781553
+            auth:
+              create_isolated_networks: False
+            barbican_rbac_scope_verification:
+              enforce_scope: True
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-victoria

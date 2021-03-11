@@ -14,11 +14,6 @@ import abc
 import base64
 from datetime import datetime
 from datetime import timedelta
-import os
-
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from tempest import config
 from tempest.lib import exceptions
@@ -28,42 +23,7 @@ from barbican_tempest_plugin.tests.rbac.v1 import base as rbac_base
 CONF = config.CONF
 
 
-def create_aes_key():
-    password = b"password"
-    salt = os.urandom(16)
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(), length=32, salt=salt,
-        iterations=1000, backend=default_backend()
-    )
-    return base64.b64encode(kdf.derive(password))
-
-
-class BarbicanV1RbacSecretsBase(rbac_base.BarbicanV1RbacBase,
-                                metaclass=abc.ABCMeta):
-
-    @classmethod
-    def setup_clients(cls):
-        super().setup_clients()
-        cls.client = cls.secret_client
-
-    def create_empty_secret_admin(self, secret_name):
-        """add empty secret as admin user """
-        return self.do_request(
-            'create_secret', client=self.admin_secret_client,
-            expected_status=201, cleanup='secret', name=secret_name)
-
-    def create_aes_secret_admin(self, secret_name):
-        key = create_aes_key()
-        expire_time = (datetime.utcnow() + timedelta(days=5))
-        return key, self.do_request(
-            'create_secret', client=self.admin_secret_client,
-            expected_status=201, cleanup="secret",
-            expiration=expire_time.isoformat(), algorithm="aes",
-            bit_length=256, mode="cbc", payload=key,
-            payload_content_type="application/octet-stream",
-            payload_content_encoding="base64",
-            name=secret_name
-        )
+class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def test_create_secret(self):
@@ -127,17 +87,23 @@ class BarbicanV1RbacSecretsBase(rbac_base.BarbicanV1RbacBase,
         pass
 
 
-class ProjectMemberTests(BarbicanV1RbacSecretsBase):
-    credentials = ['project_member', 'project_admin']
+class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.os_project_member.secret_v1.SecretClient()
 
     def test_create_secret(self):
         """Test add_secret policy."""
-        self.do_request('create_secret', expected_status=201, cleanup='secret')
+        self.do_request('create_secret', expected_status=201, cleanup='secret',
+                        name='test_create_secret')
 
-        key = create_aes_key()
+        key = rbac_base.create_aes_key()
         expire_time = (datetime.utcnow() + timedelta(days=5))
         self.do_request(
             'create_secret', expected_status=201, cleanup="secret",
+            name='test_create_secret2',
             expiration=expire_time.isoformat(), algorithm="aes",
             bit_length=256, mode="cbc", payload=key,
             payload_content_type="application/octet-stream",
@@ -147,41 +113,41 @@ class ProjectMemberTests(BarbicanV1RbacSecretsBase):
     def test_list_secrets(self):
         """Test get_secrets policy."""
         # create two secrets
-        self.create_empty_secret_admin('secret_1')
-        self.create_empty_secret_admin('secret_2')
+        self.create_empty_secret_admin('test_list_secrets')
+        self.create_empty_secret_admin('test_list_secrets_2')
 
         # list secrets with name secret_1
-        resp = self.do_request('list_secrets', name='secret_1')
+        resp = self.do_request('list_secrets', name='test_list_secrets')
         secrets = resp['secrets']
-        self.assertEqual('secret_1', secrets[0]['name'])
+        self.assertEqual('test_list_secrets', secrets[0]['name'])
 
         # list secrets with name secret_2
-        resp = self.do_request('list_secrets', name='secret_2')
+        resp = self.do_request('list_secrets', name='test_list_secrets_2')
         secrets = resp['secrets']
-        self.assertEqual('secret_2', secrets[0]['name'])
+        self.assertEqual('test_list_secrets_2', secrets[0]['name'])
 
         # list all secrets
         resp = self.do_request('list_secrets')
         secrets = resp['secrets']
-        self.assertEqual(len(secrets), 2)
+        self.assertGreaterEqual(len(secrets), 2)
 
     def test_delete_secret(self):
         """Test delete_secrets policy."""
-        sec = self.create_empty_secret_admin('secret_1')
+        sec = self.create_empty_secret_admin('test_delete_secret_1')
         uuid = rbac_base._get_uuid(sec['secret_ref'])
         self.do_request('delete_secret', secret_id=uuid)
         self.delete_cleanup('secret', uuid)
 
     def test_get_secret(self):
         """Test get_secret policy."""
-        sec = self.create_empty_secret_admin('secret_1')
+        sec = self.create_empty_secret_admin('test_get_secret')
         uuid = rbac_base._get_uuid(sec['secret_ref'])
         resp = self.do_request('get_secret_metadata', secret_id=uuid)
         self.assertEqual(uuid, rbac_base._get_uuid(resp['secret_ref']))
 
     def test_get_secret_payload(self):
         """Test get_secret payload policy."""
-        key, sec = self.create_aes_secret_admin('secret_1')
+        key, sec = self.create_aes_secret_admin('test_get_secret_payload')
         uuid = rbac_base._get_uuid(sec['secret_ref'])
 
         # Retrieve the payload
@@ -190,10 +156,10 @@ class ProjectMemberTests(BarbicanV1RbacSecretsBase):
 
     def test_put_secret_payload(self):
         """Test put_secret policy."""
-        sec = self.create_empty_secret_admin('secret_1')
+        sec = self.create_empty_secret_admin('test_put_secret_payload')
         uuid = rbac_base._get_uuid(sec['secret_ref'])
 
-        key = create_aes_key()
+        key = rbac_base.create_aes_key()
 
         # Associate the payload with the created secret
         self.do_request('put_secret_payload', secret_id=uuid, payload=key)
@@ -204,11 +170,18 @@ class ProjectMemberTests(BarbicanV1RbacSecretsBase):
 
 
 class ProjectAdminTests(ProjectMemberTests):
-    credentials = ['project_admin', 'project_admin']
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.os_project_admin.secret_v1.SecretClient()
 
 
-class ProjectReaderTests(BarbicanV1RbacSecretsBase):
-    credentials = ['project_reader', 'project_admin']
+class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.os_project_reader.secret_v1.SecretClient()
 
     def test_create_secret(self):
         """Test add_secret policy."""
@@ -216,7 +189,7 @@ class ProjectReaderTests(BarbicanV1RbacSecretsBase):
             'create_secret', expected_status=exceptions.Forbidden,
             cleanup='secret')
 
-        key = create_aes_key()
+        key = rbac_base.create_aes_key()
         expire_time = (datetime.utcnow() + timedelta(days=5))
         self.do_request(
             'create_secret', expected_status=exceptions.Forbidden,
@@ -284,7 +257,7 @@ class ProjectReaderTests(BarbicanV1RbacSecretsBase):
         sec = self.create_empty_secret_admin('secret_1')
         uuid = rbac_base._get_uuid(sec['secret_ref'])
 
-        key = create_aes_key()
+        key = rbac_base.create_aes_key()
 
         # Associate the payload with the created secret
         self.do_request(
@@ -293,8 +266,12 @@ class ProjectReaderTests(BarbicanV1RbacSecretsBase):
         )
 
 
-class SystemAdminTests(BarbicanV1RbacSecretsBase):
-    credentials = ['system_admin', 'project_admin']
+class SystemAdminTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.secret_client
 
     def test_create_secret(self):
         pass
@@ -315,8 +292,12 @@ class SystemAdminTests(BarbicanV1RbacSecretsBase):
         pass
 
 
-class SystemMemberTests(BarbicanV1RbacSecretsBase):
-    credentials = ['system_member', 'project_admin']
+class SystemMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.secret_client
 
     def test_create_secret(self):
         pass
@@ -337,8 +318,12 @@ class SystemMemberTests(BarbicanV1RbacSecretsBase):
         pass
 
 
-class SystemReaderTests(BarbicanV1RbacSecretsBase):
-    credentials = ['system_reader', 'project_admin']
+class SystemReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.secret_client
 
     def test_create_secret(self):
         pass

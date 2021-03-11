@@ -48,6 +48,11 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         super(VolumeEncryptionTest, cls).skip_checks()
         if not CONF.compute_feature_enabled.attach_encrypted_volume:
             raise cls.skipException('Encrypted volume attach is not supported')
+        if not CONF.auth.create_isolated_networks:
+            # FIXME(redorobt): remove this skip when system-scope admin
+            # issue is fixed.
+            raise cls.skipException(
+                'Volume encryption requires isolated networks')
 
     @classmethod
     def resource_setup(cls):

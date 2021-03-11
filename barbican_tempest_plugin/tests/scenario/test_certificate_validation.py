@@ -46,6 +46,11 @@ class CertificateValidationTest(barbican_manager.BarbicanScenarioTest):
             cls.max_microversion,
             CONF.compute.min_microversion,
             CONF.compute.max_microversion)
+        if not CONF.auth.create_isolated_networks:
+            # FIXME(redorobt): remove this skip when system-scope admin
+            # issue is fixed.
+            raise cls.skipException(
+                'Certificate Validation tests require isolated networks')
 
     @decorators.idempotent_id('b41bc663-5662-4b1e-b8f1-27b2876f16a6')
     @utils.services('compute', 'image')

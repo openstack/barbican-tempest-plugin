@@ -24,6 +24,11 @@ CONF = config.CONF
 
 
 class SecretClient(rest_client.RestClient):
+
+    def __init__(self, *args, **kwargs):
+        kwargs['service'] = 'key-manager'
+        super().__init__(*args, **kwargs)
+
     def create_secret(self, **kwargs):
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name("tempest-sec")
