@@ -30,10 +30,6 @@ CONF = config.CONF
 RESOURCE_TYPES = ['container', 'order', 'quota', 'secret']
 
 
-def _get_uuid(href):
-    return href.split('/')[-1]
-
-
 def create_aes_key():
     password = b"password"
     salt = os.urandom(16)
@@ -50,7 +46,12 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     _created_projects = None
     _created_users = None
     created_objects = {}
+
     credentials = ['system_admin']
+
+    @classmethod
+    def ref_to_uuid(cls, href):
+        return href.split('/')[-1]
 
     @classmethod
     def skip_checks(cls):
@@ -129,9 +130,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.consumer_client = os.secret_v1.ConsumerClient(
             service='key-manager'
         )
-        cls.container_client = os.secret_v1.ContainerClient(
-            service='key-manager'
-        )
+        cls.container_client = os.secret_v1.ContainerClient()
         cls.order_client = os.secret_v1.OrderClient(service='key-manager')
         cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')
         cls.secret_client = os.secret_v1.SecretClient()
@@ -149,9 +148,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.admin_consumer_client = adm.secret_v1.ConsumerClient(
             service='key-manager'
         )
-        cls.admin_container_client = adm.secret_v1.ContainerClient(
-            service='key-manager'
-        )
+        cls.admin_container_client = adm.secret_v1.ContainerClient()
         cls.admin_order_client = adm.secret_v1.OrderClient(
             service='key-manager'
         )
@@ -192,18 +189,18 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     @classmethod
     def add_cleanup(cls, resource, response):
         if resource == 'container':
-            uuid = _get_uuid(response['container_ref'])
+            uuid = cls.ref_to_uuid(response['container_ref'])
         if resource == 'order':
-            uuid = _get_uuid(response.get('order_ref'))
+            uuid = cls.ref_to_uuid(response.get('order_ref'))
             order_metadata = cls.get_order(uuid)
             secret_ref = order_metadata.get('secret_ref')
             if secret_ref:
-                cls.created_objects['secret'].add(_get_uuid(secret_ref))
-            uuid = _get_uuid(response['order_ref'])
+                cls.created_objects['secret'].add(cls.ref_to_uuid(secret_ref))
+            uuid = cls.ref_to_uuid(response['order_ref'])
         if resource == 'quota':
-            uuid = _get_uuid(response['quota_ref'])
+            uuid = cls.ref_to_uuid(response['quota_ref'])
         if resource == 'secret':
-            uuid = _get_uuid(response['secret_ref'])
+            uuid = cls.ref_to_uuid(response['secret_ref'])
         cls.created_objects[resource].add(uuid)
 
     @classmethod

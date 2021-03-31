@@ -34,7 +34,7 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
           * whether the persona can create an empty secret
           * whether the persona can create a secret with a symmetric key
         """
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     def test_list_secrets(self):
@@ -44,7 +44,7 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
         This test must check:
           * whether the persona can list secrets within their project
         """
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     def test_delete_secret(self):
@@ -54,7 +54,7 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
         This test must check:
           * whether the persona can delete a secret in their project
         """
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     def test_get_secret(self):
@@ -64,7 +64,7 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
         This test must check:
           * whether the persona can get a specific secret within their project
         """
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     def test_get_secret_payload(self):
@@ -74,7 +74,7 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
         This test must check:
           * whether the persona can get a secret payload
         """
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     def test_put_secret_payload(self):
@@ -84,7 +84,7 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
         This test must check:
           * whether the persona can add a paylod to an empty secret
         """
-        pass
+        raise NotImplementedError
 
 
 class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
@@ -134,21 +134,21 @@ class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def test_delete_secret(self):
         """Test delete_secrets policy."""
         sec = self.create_empty_secret_admin('test_delete_secret_1')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
         self.do_request('delete_secret', secret_id=uuid)
         self.delete_cleanup('secret', uuid)
 
     def test_get_secret(self):
         """Test get_secret policy."""
         sec = self.create_empty_secret_admin('test_get_secret')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
         resp = self.do_request('get_secret_metadata', secret_id=uuid)
-        self.assertEqual(uuid, rbac_base._get_uuid(resp['secret_ref']))
+        self.assertEqual(uuid, self.ref_to_uuid(resp['secret_ref']))
 
     def test_get_secret_payload(self):
         """Test get_secret payload policy."""
         key, sec = self.create_aes_secret_admin('test_get_secret_payload')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
 
         # Retrieve the payload
         payload = self.do_request('get_secret_payload', secret_id=uuid)
@@ -157,7 +157,7 @@ class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def test_put_secret_payload(self):
         """Test put_secret policy."""
         sec = self.create_empty_secret_admin('test_put_secret_payload')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
 
         key = rbac_base.create_aes_key()
 
@@ -226,7 +226,7 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def test_delete_secret(self):
         """Test delete_secrets policy."""
         sec = self.create_empty_secret_admin('secret_1')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
         self.do_request(
             'delete_secret', expected_status=exceptions.Forbidden,
             secret_id=uuid
@@ -235,7 +235,7 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def test_get_secret(self):
         """Test get_secret policy."""
         sec = self.create_empty_secret_admin('secret_1')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
         self.do_request(
             'get_secret_metadata', expected_status=exceptions.Forbidden,
             secret_id=uuid
@@ -244,7 +244,7 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def test_get_secret_payload(self):
         """Test get_secret payload policy."""
         key, sec = self.create_aes_secret_admin('secret_1')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
 
         # Retrieve the payload
         self.do_request(
@@ -255,7 +255,7 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def test_put_secret_payload(self):
         """Test put_secret policy."""
         sec = self.create_empty_secret_admin('secret_1')
-        uuid = rbac_base._get_uuid(sec['secret_ref'])
+        uuid = self.ref_to_uuid(sec['secret_ref'])
 
         key = rbac_base.create_aes_key()
 
