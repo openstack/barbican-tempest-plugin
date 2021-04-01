@@ -14,16 +14,17 @@
 
 
 import json
-
 from urllib import parse as urllib
 
 from tempest import config
-from tempest.lib.common import rest_client
+
+from barbican_tempest_plugin.services.key_manager.json import base
+
 
 CONF = config.CONF
 
 
-class QuotaClient(rest_client.RestClient):
+class QuotaClient(base.BarbicanTempestClient):
 
     def list_quotas(self, **kwargs):
         uri = "v1/project-quotas"

@@ -132,7 +132,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         )
         cls.container_client = os.secret_v1.ContainerClient()
         cls.order_client = os.secret_v1.OrderClient()
-        cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')
+        cls.quota_client = os.secret_v1.QuotaClient()
         cls.secret_client = os.secret_v1.SecretClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
             service='key-manager'
@@ -150,9 +150,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         )
         cls.admin_container_client = adm.secret_v1.ContainerClient()
         cls.admin_order_client = adm.secret_v1.OrderClient()
-        cls.admin_quota_client = adm.secret_v1.QuotaClient(
-            service='key-manager'
-        )
+        cls.admin_quota_client = adm.secret_v1.QuotaClient()
         cls.admin_secret_client = adm.secret_v1.SecretClient(
             service='key-manager'
         )
