@@ -17,17 +17,15 @@
 import json
 
 from tempest import config
-from tempest.lib.common import rest_client
 from tempest.lib.common.utils import data_utils
+
+from barbican_tempest_plugin.services.key_manager.json import base
+
 
 CONF = config.CONF
 
 
-class SecretClient(rest_client.RestClient):
-
-    def __init__(self, *args, **kwargs):
-        kwargs['service'] = 'key-manager'
-        super().__init__(*args, **kwargs)
+class SecretClient(base.BarbicanTempestClient):
 
     def create_secret(self, **kwargs):
         if 'name' not in kwargs:

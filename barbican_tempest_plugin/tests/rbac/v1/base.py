@@ -131,7 +131,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             service='key-manager'
         )
         cls.container_client = os.secret_v1.ContainerClient()
-        cls.order_client = os.secret_v1.OrderClient(service='key-manager')
+        cls.order_client = os.secret_v1.OrderClient()
         cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')
         cls.secret_client = os.secret_v1.SecretClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
@@ -149,9 +149,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             service='key-manager'
         )
         cls.admin_container_client = adm.secret_v1.ContainerClient()
-        cls.admin_order_client = adm.secret_v1.OrderClient(
-            service='key-manager'
-        )
+        cls.admin_order_client = adm.secret_v1.OrderClient()
         cls.admin_quota_client = adm.secret_v1.QuotaClient(
             service='key-manager'
         )
@@ -192,7 +190,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             uuid = cls.ref_to_uuid(response['container_ref'])
         if resource == 'order':
             uuid = cls.ref_to_uuid(response.get('order_ref'))
-            order_metadata = cls.get_order(uuid)
+            order_metadata = cls.admin_order_client.get_order(uuid)
             secret_ref = order_metadata.get('secret_ref')
             if secret_ref:
                 cls.created_objects['secret'].add(cls.ref_to_uuid(secret_ref))

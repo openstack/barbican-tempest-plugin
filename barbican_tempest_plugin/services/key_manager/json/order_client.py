@@ -11,19 +11,18 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
-
-
 import json
-
 from urllib import parse as urllib
 
 from tempest import config
-from tempest.lib.common import rest_client
+
+from barbican_tempest_plugin.services.key_manager.json import base
+
 
 CONF = config.CONF
 
 
-class OrderClient(rest_client.RestClient):
+class OrderClient(base.BarbicanTempestClient):
 
     def list_orders(self, **kwargs):
         uri = "/v1/orders"
