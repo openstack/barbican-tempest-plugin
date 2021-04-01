@@ -20,6 +20,17 @@ service_option = cfg.BoolOpt("barbican",
                              help="Whether or not barbican is expected to be "
                                   "available")
 
+barbican_tempest_group = cfg.OptGroup(
+    name='barbican_tempest',
+    title='Key Manager (Barbican) service options'
+)
+
+BarbicanGroupOpts = [
+    cfg.BoolOpt('enable_multiple_secret_stores',
+                default=False,
+                help="Flag to enable mulitple secret store tests")
+]
+
 ephemeral_storage_encryption_group = cfg.OptGroup(
     name="ephemeral_storage_encryption",
     title="Ephemeral storage encryption options")
