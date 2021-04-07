@@ -23,7 +23,7 @@ from barbican_tempest_plugin.tests.rbac.v1 import base as rbac_base
 CONF = config.CONF
 
 
-class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
+class BarbicanV1RbacSecrets:
 
     @abc.abstractmethod
     def test_create_secret(self):
@@ -86,91 +86,50 @@ class BarbicanV1RbacSecrets(metaclass=abc.ABCMeta):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def test_get_other_project_secret(self):
+        """Test get_secrets policy
 
-class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+        Testing: GET /v1/secrets/{secret_id}
+        This test must check:
+          * whether the persona can get secret metadata for a secret that
+            belongs to a different project
+        """
+        raise NotImplementedError
 
-    @classmethod
-    def setup_clients(cls):
-        super().setup_clients()
-        cls.client = cls.os_project_member.secret_v1.SecretClient()
+    @abc.abstractmethod
+    def test_get_other_project_secret_payload(self):
+        """Test get_secrets policy
 
-    def test_create_secret(self):
-        """Test add_secret policy."""
-        self.client.create_secret(name='test_create_secret')
+        Testing: GET /v1/secrets/{secret_id}/payload
+        This test must check:
+          * whether the persona can get secret payload for a secret that
+            belongs to a different project
+        """
+        raise NotImplementedError
 
-        key = rbac_base.create_aes_key()
-        expire_time = (datetime.utcnow() + timedelta(days=5))
-        self.client.create_secret(
-            name='test_create_secret2',
-            expiration=expire_time.isoformat(), algorithm="aes",
-            bit_length=256, mode="cbc", payload=key,
-            payload_content_type="application/octet-stream",
-            payload_content_encoding="base64"
-        )
+    @abc.abstractmethod
+    def test_put_other_project_secret_payload(self):
+        """Test put_secret policy.
 
-    def test_list_secrets(self):
-        """Test get_secrets policy."""
-        # create two secrets
-        self.create_empty_secret_admin('test_list_secrets')
-        self.create_empty_secret_admin('test_list_secrets_2')
+        Testing: PUT /v1/secrets/{secret_id}
+        This test must check:
+          * whether the persona can PUT the secret payload in a 2-step
+            create when the first step is done by a member of a different
+            project.
+        """
+        raise NotImplementedError
 
-        # list secrets with name secret_1
-        resp = self.client.list_secrets(name='test_list_secrets')
-        secrets = resp['secrets']
-        self.assertEqual('test_list_secrets', secrets[0]['name'])
+    @abc.abstractmethod
+    def test_delete_other_project_secret(self):
+        """Test delete_secret policy.
 
-        # list secrets with name secret_2
-        resp = self.client.list_secrets(name='test_list_secrets_2')
-        secrets = resp['secrets']
-        self.assertEqual('test_list_secrets_2', secrets[0]['name'])
-
-        # list all secrets
-        resp = self.client.list_secrets()
-        secrets = resp['secrets']
-        self.assertGreaterEqual(len(secrets), 2)
-
-    def test_delete_secret(self):
-        """Test delete_secrets policy."""
-        sec = self.create_empty_secret_admin('test_delete_secret_1')
-        uuid = self.client.ref_to_uuid(sec['secret_ref'])
-        self.client.delete_secret(uuid)
-
-    def test_get_secret(self):
-        """Test get_secret policy."""
-        sec = self.create_empty_secret_admin('test_get_secret')
-        uuid = self.client.ref_to_uuid(sec['secret_ref'])
-        resp = self.client.get_secret_metadata(uuid)
-        self.assertEqual(uuid, self.client.ref_to_uuid(resp['secret_ref']))
-
-    def test_get_secret_payload(self):
-        """Test get_secret payload policy."""
-        key, sec = self.create_aes_secret_admin('test_get_secret_payload')
-        uuid = self.client.ref_to_uuid(sec['secret_ref'])
-
-        # Retrieve the payload
-        payload = self.client.get_secret_payload(uuid)
-        self.assertEqual(key, base64.b64encode(payload))
-
-    def test_put_secret_payload(self):
-        """Test put_secret policy."""
-        sec = self.create_empty_secret_admin('test_put_secret_payload')
-        uuid = self.client.ref_to_uuid(sec['secret_ref'])
-
-        key = rbac_base.create_aes_key()
-
-        # Associate the payload with the created secret
-        self.client.put_secret_payload(uuid, key)
-
-        # Retrieve the payload
-        payload = self.client.get_secret_payload(uuid)
-        self.assertEqual(key, base64.b64encode(payload))
-
-
-class ProjectAdminTests(ProjectMemberTests):
-    @classmethod
-    def setup_clients(cls):
-        super().setup_clients()
-        cls.client = cls.os_project_admin.secret_v1.SecretClient()
+        Testing: DELETE /v1/secrets/{secret_id}
+        This test must check:
+          * whether the persona can delete a secret that belongs to a
+            different project
+        """
+        raise NotImplementedError
 
 
 class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
@@ -265,57 +224,126 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
             secret_id=uuid, payload=key
         )
 
+    def test_get_other_project_secret(self):
+        other_secret_id = self.create_other_project_secret(
+            'get_other_secret',
+            payload='¡Muy secreto!')
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_secret_metadata,
+            other_secret_id)
 
-class SystemAdminTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+    def test_get_other_project_secret_payload(self):
+        other_secret_id = self.create_other_project_secret(
+            'get_other_payload',
+            payload='¡Más secreto!')
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_secret_payload,
+            other_secret_id)
+
+    def test_put_other_project_secret_payload(self):
+        other_secret_id = self.create_other_project_secret('put_other_payload')
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.put_secret_payload,
+            other_secret_id,
+            'Shhhh... secret!')
+
+    def test_delete_other_project_secret(self):
+        other_secret_id = self.create_other_project_secret(
+            'get_other_payload',
+            payload='loremipsumloremipsum')
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_secret,
+            other_secret_id)
+
+
+class ProjectMemberTests(ProjectReaderTests):
 
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
-        cls.client = cls.secret_client
+        cls.client = cls.os_project_member.secret_v1.SecretClient()
 
     def test_create_secret(self):
-        pass
+        """Test add_secret policy."""
+        self.client.create_secret(name='test_create_secret')
+
+        key = rbac_base.create_aes_key()
+        expire_time = (datetime.utcnow() + timedelta(days=5))
+        self.client.create_secret(
+            name='test_create_secret2',
+            expiration=expire_time.isoformat(), algorithm="aes",
+            bit_length=256, mode="cbc", payload=key,
+            payload_content_type="application/octet-stream",
+            payload_content_encoding="base64"
+        )
 
     def test_list_secrets(self):
-        pass
+        """Test get_secrets policy."""
+        # create two secrets
+        self.create_empty_secret_admin('test_list_secrets')
+        self.create_empty_secret_admin('test_list_secrets_2')
+
+        # list secrets with name secret_1
+        resp = self.client.list_secrets(name='test_list_secrets')
+        secrets = resp['secrets']
+        self.assertEqual('test_list_secrets', secrets[0]['name'])
+
+        # list secrets with name secret_2
+        resp = self.client.list_secrets(name='test_list_secrets_2')
+        secrets = resp['secrets']
+        self.assertEqual('test_list_secrets_2', secrets[0]['name'])
+
+        # list all secrets
+        resp = self.client.list_secrets()
+        secrets = resp['secrets']
+        self.assertGreaterEqual(len(secrets), 2)
 
     def test_delete_secret(self):
-        pass
+        """Test delete_secrets policy."""
+        sec = self.create_empty_secret_admin('test_delete_secret_1')
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
+        self.client.delete_secret(uuid)
 
     def test_get_secret(self):
-        pass
+        """Test get_secret policy."""
+        sec = self.create_empty_secret_admin('test_get_secret')
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
+        resp = self.client.get_secret_metadata(uuid)
+        self.assertEqual(uuid, self.client.ref_to_uuid(resp['secret_ref']))
 
     def test_get_secret_payload(self):
-        pass
+        """Test get_secret payload policy."""
+        key, sec = self.create_aes_secret_admin('test_get_secret_payload')
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
+
+        # Retrieve the payload
+        payload = self.client.get_secret_payload(uuid)
+        self.assertEqual(key, base64.b64encode(payload))
 
     def test_put_secret_payload(self):
-        pass
+        """Test put_secret policy."""
+        sec = self.create_empty_secret_admin('test_put_secret_payload')
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
+
+        key = rbac_base.create_aes_key()
+
+        # Associate the payload with the created secret
+        self.client.put_secret_payload(uuid, key)
+
+        # Retrieve the payload
+        payload = self.client.get_secret_payload(uuid)
+        self.assertEqual(key, base64.b64encode(payload))
 
 
-class SystemMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
-
+class ProjectAdminTests(ProjectMemberTests):
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
-        cls.client = cls.secret_client
-
-    def test_create_secret(self):
-        pass
-
-    def test_list_secrets(self):
-        pass
-
-    def test_delete_secret(self):
-        pass
-
-    def test_get_secret(self):
-        pass
-
-    def test_get_secret_payload(self):
-        pass
-
-    def test_put_secret_payload(self):
-        pass
+        cls.client = cls.os_project_admin.secret_v1.SecretClient()
 
 
 class SystemReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
@@ -342,3 +370,31 @@ class SystemReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
 
     def test_put_secret_payload(self):
         pass
+
+    def test_get_other_project_secret(self):
+        pass
+
+    def test_get_other_project_secret_payload(self):
+        pass
+
+    def test_put_other_project_secret_payload(self):
+        pass
+
+    def test_delete_other_project_secret(self):
+        pass
+
+
+class SystemMemberTests(SystemReaderTests):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.secret_client
+
+
+class SystemAdminTests(SystemMemberTests):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.secret_client

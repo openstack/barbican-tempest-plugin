@@ -47,7 +47,10 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     _created_users = None
     created_objects = {}
 
-    credentials = ['system_admin']
+    credentials = [
+        'system_admin',
+        'project_alt_member'
+    ]
 
     # TODO(dmendiza): remove this and use the clients instead
     @classmethod
@@ -76,6 +79,8 @@ class BarbicanV1RbacBase(test.BaseTestCase):
                 cls._setup_new_user_client(project_id, 'member'))
         setattr(cls, 'os_project_reader',
                 cls._setup_new_user_client(project_id, 'reader'))
+        setattr(cls, 'os_project_other_member',
+                cls._setup_new_user_client(project_id, 'member'))
 
     @classmethod
     def _setup_new_user_client(cls, project_id, role):
@@ -122,7 +127,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     def setup_clients(cls):
         super().setup_clients()
 
-        # setup clients for primary persona
+        # set up member clients
         os = cls.os_project_member
         cls.secret_client = os.secret_v1.SecretClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
@@ -154,6 +159,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
+        cls.other_client = cls.os_project_alt_member.secret_v1.SecretClient()
 
     @classmethod
     def resource_setup(cls):
@@ -176,7 +182,9 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             for secret_uuid in list(cls.created_objects['secret']):
                 cls.admin_secret_client.delete_secret(secret_uuid)
                 cls.created_objects['secret'].remove(secret_uuid)
-            for client in [cls.secret_client, cls.admin_secret_client]:
+            for client in [cls.secret_client,
+                           cls.admin_secret_client,
+                           cls.other_client]:
                 client.cleanup()
         finally:
             super(BarbicanV1RbacBase, cls).resource_cleanup()
@@ -234,3 +242,14 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             payload_content_encoding="base64",
             name=secret_name
         )
+
+    def create_other_project_secret(self, secret_name, payload=None):
+        kwargs = {
+            'name': secret_name,
+            'secret_type': 'passphrase',
+        }
+        if payload is not None:
+            kwargs['payload'] = payload
+            kwargs['payload_content_type'] = 'text/plain'
+        resp = self.other_client.create_secret(**kwargs)
+        return self.other_client.ref_to_uuid(resp['secret_ref'])
