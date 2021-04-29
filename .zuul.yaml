@@ -6,6 +6,7 @@
       jobs:
         - barbican-tempest-plugin-simple-crypto
         - barbican-tempest-plugin-simple-crypto-secure-rbac
+        - barbican-tempest-plugin-simple-crypto-wallaby
         - barbican-tempest-plugin-simple-crypto-victoria
         - barbican-tempest-plugin-simple-crypto-ussuri
         - barbican-tempest-plugin-simple-crypto-train
@@ -75,6 +76,11 @@
               create_isolated_networks: False
             barbican_rbac_scope_verification:
               enforce_scope: True
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-wallaby
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/wallaby
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-victoria
