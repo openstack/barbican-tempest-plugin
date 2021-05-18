@@ -26,6 +26,8 @@ from barbican_tempest_plugin.services.key_manager.json.secret_metadata_client \
     import SecretMetadataClient
 from barbican_tempest_plugin.services.key_manager.json.secret_stores_client \
     import SecretStoresClient
+from barbican_tempest_plugin.services.key_manager.json.transport_key_client \
+    import TransportKeyClient
 
 __all__ = [
     'ConsumerClient',
@@ -34,5 +36,6 @@ __all__ = [
     'QuotaClient',
     'SecretClient',
     'SecretMetadataClient',
-    'SecretStoresClient'
+    'SecretStoresClient',
+    'TransportKeyClient'
 ]

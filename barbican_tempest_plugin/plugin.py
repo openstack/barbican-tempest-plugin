@@ -65,7 +65,8 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
                 'QuotaClient',
                 'SecretClient',
                 'SecretMetadataClient',
-                'SecretStoresClient'
+                'SecretStoresClient',
+                'TransportKeyClient'
             ],
         }
         return [v1_params]
