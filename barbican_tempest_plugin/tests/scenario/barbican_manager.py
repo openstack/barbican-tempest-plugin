@@ -68,8 +68,8 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
                 'path in CONF.scenario.img_file config option.')
             self.img_file = os.path.join(CONF.scenario.img_dir, self.img_file)
 
-        self.private_key = rsa.generate_private_key(public_exponent=3,
-                                                    key_size=1024,
+        self.private_key = rsa.generate_private_key(public_exponent=65537,
+                                                    key_size=3072,
                                                     backend=default_backend())
         self.signing_certificate = self._create_self_signed_certificate(
             self.private_key,
