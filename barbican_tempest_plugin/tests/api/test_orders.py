@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import time
+
 from tempest.lib import decorators
 
 from barbican_tempest_plugin.tests.api import base
@@ -56,7 +58,14 @@ class OrdersTest(base.BaseKeyManagerTest):
         self.assertEqual(2, body.get('total'), body)
         self.assertEqual(2, len(body.get('orders')), body)
 
-        orders = body.get('orders')
+        # Wait max 60 seconds for orders to finish
+        for _ in range(12):
+            orders = self.order_client.list_orders().get('orders')
+            statuses = [o['status'] for o in orders]
+            if len(set(statuses)) == 1 and statuses[0] == 'ACTIVE':
+                break
+            time.sleep(5)
+
         for order in orders:
             self.assertIn(
                 base._get_uuid(order.get('order_ref')),
