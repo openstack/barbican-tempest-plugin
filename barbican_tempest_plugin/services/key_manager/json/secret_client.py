@@ -18,6 +18,7 @@ import json
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
+from tempest.lib import exceptions
 
 from barbican_tempest_plugin.services.key_manager.json import base
 
@@ -27,7 +28,11 @@ CONF = config.CONF
 
 class SecretClient(base.BarbicanTempestClient):
 
-    def create_secret(self, **kwargs):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._secret_ids = set()
+
+    def create_secret(self, expected_status=201, **kwargs):
         if 'name' not in kwargs:
             kwargs['name'] = data_utils.rand_name("tempest-sec")
 
@@ -37,10 +42,13 @@ class SecretClient(base.BarbicanTempestClient):
         post_body = kwargs
         body = json.dumps(post_body)
         resp, body = self.post("v1/secrets", body)
-        self.expected_success(201, resp.status)
-        return self._parse_resp(body)
+        self.expected_success(expected_status, resp.status)
+        resp = self._parse_resp(body)
+        self._secret_ids.add(self.ref_to_uuid(resp['secret_ref']))
+        return resp
 
     def delete_secret(self, secret_id):
+        self._secret_ids.discard(secret_id)
         resp, body = self.delete("v1/secrets/%s" % secret_id)
         self.expected_success(204, resp.status)
         return body
@@ -84,3 +92,15 @@ class SecretClient(base.BarbicanTempestClient):
                               headers=content_headers)
         self.expected_success(204, resp.status)
         return body
+
+    def queue_for_cleanup(self, secret_id):
+        self._secret_ids.add(secret_id)
+
+    def cleanup(self):
+        cleanup_ids = self._secret_ids
+        self._secret_ids = set()
+        for secret_id in cleanup_ids:
+            try:
+                self.delete_secret(secret_id)
+            except exceptions.NotFound:
+                pass

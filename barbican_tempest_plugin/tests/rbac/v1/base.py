@@ -49,6 +49,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
 
     credentials = ['system_admin']
 
+    # TODO(dmendiza): remove this and use the clients instead
     @classmethod
     def ref_to_uuid(cls, href):
         return href.split('/')[-1]
@@ -133,7 +134,6 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.container_client = os.secret_v1.ContainerClient()
         cls.order_client = os.secret_v1.OrderClient()
         cls.quota_client = os.secret_v1.QuotaClient()
-        cls.secret_client = os.secret_v1.SecretClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
@@ -151,9 +151,6 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.admin_container_client = adm.secret_v1.ContainerClient()
         cls.admin_order_client = adm.secret_v1.OrderClient()
         cls.admin_quota_client = adm.secret_v1.QuotaClient()
-        cls.admin_secret_client = adm.secret_v1.SecretClient(
-            service='key-manager'
-        )
         cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
@@ -179,6 +176,8 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             for secret_uuid in list(cls.created_objects['secret']):
                 cls.admin_secret_client.delete_secret(secret_uuid)
                 cls.created_objects['secret'].remove(secret_uuid)
+            for client in [cls.secret_client, cls.admin_secret_client]:
+                client.cleanup()
         finally:
             super(BarbicanV1RbacBase, cls).resource_cleanup()
 
@@ -203,6 +202,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     def delete_cleanup(cls, resource, uuid):
         cls.created_objects[resource].remove(uuid)
 
+    # TODO(dmendiza): get rid of this helper method.
     def do_request(self, method, client=None, expected_status=200,
                    cleanup=None, **args):
         if client is None:
@@ -220,9 +220,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
 
     def create_empty_secret_admin(self, secret_name):
         """add empty secret as admin user """
-        return self.do_request(
-            'create_secret', client=self.admin_secret_client,
-            expected_status=201, cleanup='secret', name=secret_name)
+        return self.admin_secret_client.create_secret(name=secret_name)
 
     def create_aes_secret_admin(self, secret_name):
         key = create_aes_key()

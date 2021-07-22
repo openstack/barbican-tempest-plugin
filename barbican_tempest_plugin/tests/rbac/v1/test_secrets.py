@@ -96,13 +96,11 @@ class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
 
     def test_create_secret(self):
         """Test add_secret policy."""
-        self.do_request('create_secret', expected_status=201, cleanup='secret',
-                        name='test_create_secret')
+        self.client.create_secret(name='test_create_secret')
 
         key = rbac_base.create_aes_key()
         expire_time = (datetime.utcnow() + timedelta(days=5))
-        self.do_request(
-            'create_secret', expected_status=201, cleanup="secret",
+        self.client.create_secret(
             name='test_create_secret2',
             expiration=expire_time.isoformat(), algorithm="aes",
             bit_length=256, mode="cbc", payload=key,
@@ -117,55 +115,54 @@ class ProjectMemberTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
         self.create_empty_secret_admin('test_list_secrets_2')
 
         # list secrets with name secret_1
-        resp = self.do_request('list_secrets', name='test_list_secrets')
+        resp = self.client.list_secrets(name='test_list_secrets')
         secrets = resp['secrets']
         self.assertEqual('test_list_secrets', secrets[0]['name'])
 
         # list secrets with name secret_2
-        resp = self.do_request('list_secrets', name='test_list_secrets_2')
+        resp = self.client.list_secrets(name='test_list_secrets_2')
         secrets = resp['secrets']
         self.assertEqual('test_list_secrets_2', secrets[0]['name'])
 
         # list all secrets
-        resp = self.do_request('list_secrets')
+        resp = self.client.list_secrets()
         secrets = resp['secrets']
         self.assertGreaterEqual(len(secrets), 2)
 
     def test_delete_secret(self):
         """Test delete_secrets policy."""
         sec = self.create_empty_secret_admin('test_delete_secret_1')
-        uuid = self.ref_to_uuid(sec['secret_ref'])
-        self.do_request('delete_secret', secret_id=uuid)
-        self.delete_cleanup('secret', uuid)
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
+        self.client.delete_secret(uuid)
 
     def test_get_secret(self):
         """Test get_secret policy."""
         sec = self.create_empty_secret_admin('test_get_secret')
-        uuid = self.ref_to_uuid(sec['secret_ref'])
-        resp = self.do_request('get_secret_metadata', secret_id=uuid)
-        self.assertEqual(uuid, self.ref_to_uuid(resp['secret_ref']))
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
+        resp = self.client.get_secret_metadata(uuid)
+        self.assertEqual(uuid, self.client.ref_to_uuid(resp['secret_ref']))
 
     def test_get_secret_payload(self):
         """Test get_secret payload policy."""
         key, sec = self.create_aes_secret_admin('test_get_secret_payload')
-        uuid = self.ref_to_uuid(sec['secret_ref'])
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
 
         # Retrieve the payload
-        payload = self.do_request('get_secret_payload', secret_id=uuid)
+        payload = self.client.get_secret_payload(uuid)
         self.assertEqual(key, base64.b64encode(payload))
 
     def test_put_secret_payload(self):
         """Test put_secret policy."""
         sec = self.create_empty_secret_admin('test_put_secret_payload')
-        uuid = self.ref_to_uuid(sec['secret_ref'])
+        uuid = self.client.ref_to_uuid(sec['secret_ref'])
 
         key = rbac_base.create_aes_key()
 
         # Associate the payload with the created secret
-        self.do_request('put_secret_payload', secret_id=uuid, payload=key)
+        self.client.put_secret_payload(uuid, key)
 
         # Retrieve the payload
-        payload = self.do_request('get_secret_payload', secret_id=uuid)
+        payload = self.client.get_secret_payload(uuid)
         self.assertEqual(key, base64.b64encode(payload))
 
 
@@ -185,15 +182,13 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
 
     def test_create_secret(self):
         """Test add_secret policy."""
-        self.do_request(
-            'create_secret', expected_status=exceptions.Forbidden,
-            cleanup='secret')
+        self.assertRaises(exceptions.Forbidden, self.client.create_secret)
 
         key = rbac_base.create_aes_key()
         expire_time = (datetime.utcnow() + timedelta(days=5))
-        self.do_request(
-            'create_secret', expected_status=exceptions.Forbidden,
-            cleanup="secret",
+
+        self.assertRaises(
+            exceptions.Forbidden, self.client.create_secret,
             expiration=expire_time.isoformat(), algorithm="aes",
             bit_length=256, mode="cbc", payload=key,
             payload_content_type="application/octet-stream",
@@ -207,28 +202,30 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
         self.create_empty_secret_admin('secret_2')
 
         # list secrets with name secret_1
-        self.do_request(
-            'list_secrets', expected_status=exceptions.Forbidden,
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.list_secrets,
             name='secret_1'
         )
 
         # list secrets with name secret_2
-        self.do_request(
-            'list_secrets', expected_status=exceptions.Forbidden,
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.list_secrets,
             name='secret_2'
         )
 
         # list all secrets
-        self.do_request(
-            'list_secrets', expected_status=exceptions.Forbidden
-        )
+        self.assertRaises(exceptions.Forbidden, self.client.list_secrets)
 
     def test_delete_secret(self):
         """Test delete_secrets policy."""
         sec = self.create_empty_secret_admin('secret_1')
         uuid = self.ref_to_uuid(sec['secret_ref'])
-        self.do_request(
-            'delete_secret', expected_status=exceptions.Forbidden,
+
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_secret,
             secret_id=uuid
         )
 
@@ -236,8 +233,9 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
         """Test get_secret policy."""
         sec = self.create_empty_secret_admin('secret_1')
         uuid = self.ref_to_uuid(sec['secret_ref'])
-        self.do_request(
-            'get_secret_metadata', expected_status=exceptions.Forbidden,
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_secret_metadata,
             secret_id=uuid
         )
 
@@ -247,8 +245,9 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
         uuid = self.ref_to_uuid(sec['secret_ref'])
 
         # Retrieve the payload
-        self.do_request(
-            'get_secret_payload', expected_status=exceptions.Forbidden,
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_secret_payload,
             secret_id=uuid
         )
 
@@ -260,8 +259,9 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
         key = rbac_base.create_aes_key()
 
         # Associate the payload with the created secret
-        self.do_request(
-            'put_secret_payload', expected_status=exceptions.Forbidden,
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.put_secret_payload,
             secret_id=uuid, payload=key
         )
 

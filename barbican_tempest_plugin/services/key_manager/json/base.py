@@ -20,3 +20,7 @@ class BarbicanTempestClient(rest_client.RestClient):
     def __init__(self, *args, **kwargs):
         kwargs['service'] = _DEFAULT_SERVICE_TYPE
         super().__init__(*args, **kwargs)
+
+    @classmethod
+    def ref_to_uuid(cls, href):
+        return href.split('/')[-1]
