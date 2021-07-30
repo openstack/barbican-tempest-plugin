@@ -10,7 +10,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import abc
-import time
 
 from tempest.lib import exceptions
 
@@ -68,58 +67,28 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacOrders):
         cls.client = cls.os_project_member.secret_v1.OrderClient()
 
     def test_list_orders(self):
-        self.do_request('create_order', cleanup='order',
-                        name='list_orders', type='key',
-                        meta={
-                            'name': 'list_orders_s',
-                            'algorithm': 'aes',
-                            'bit_length': 256,
-                            'mode': 'cbc',
-                        })
-        resp = self.do_request('list_orders')
+        _ = self.create_key_order('test_list_orders')
+        resp = self.client.list_orders()
         self.assertGreaterEqual(len(resp['orders']), 1)
 
     def test_create_order(self):
-        self.do_request('create_order', cleanup='order',
-                        name='create_order', type='key',
-                        meta={
-                            'name': 'create_orders_s',
-                            'algorithm': 'aes',
-                            'bit_length': 256,
-                            'mode': 'cbc',
-                        })
+        self.client.create_order(
+            name='create_order', type='key',
+            meta={
+                'name': 'create_orders_s',
+                'algorithm': 'aes',
+                'bit_length': 256,
+                'mode': 'cbc',
+            })
 
     def test_get_order(self):
-        resp = self.do_request('create_order', cleanup='order',
-                               name='get_order', type='key',
-                               meta={
-                                   'name': 'get_order_s',
-                                   'algorithm': 'aes',
-                                   'bit_length': 256,
-                                   'mode': 'cbc',
-                               })
-        order_id = self.ref_to_uuid(resp['order_ref'])
-        resp = self.do_request('get_order', order_id=order_id)
-        self.assertEqual(order_id, self.ref_to_uuid(resp['order_ref']))
+        order_id = self.create_key_order('test_get_order')
+        resp = self.client.get_order(order_id)
+        self.assertEqual(order_id, self.client.ref_to_uuid(resp['order_ref']))
 
     def test_delete_order(self):
-        resp = self.do_request('create_order',
-                               name='delete_order', type='key',
-                               meta={
-                                   'name': 'delete_order_s',
-                                   'algorithm': 'aes',
-                                   'bit_length': 256,
-                                   'mode': 'cbc',
-                               })
-        order_id = self.ref_to_uuid(resp['order_ref'])
-        while True:
-            time.sleep(1)
-            resp = self.do_request('get_order', order_id=order_id)
-            if 'ACTIVE' == resp['status']:
-                self.add_cleanup('secret', resp)
-                break
-
-        self.do_request('delete_order', order_id=order_id)
+        order_id = self.create_key_order('test_delete_order')
+        self.client.delete_order(order_id)
 
 
 class ProjectAdminTests(ProjectMemberTests):
@@ -138,49 +107,30 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacOrders):
         cls.client = cls.os_project_reader.secret_v1.OrderClient()
 
     def test_list_orders(self):
-        self.do_request('list_orders', expected_status=exceptions.Forbidden)
+        self.assertRaises(exceptions.Forbidden, self.client.list_orders)
 
     def test_create_order(self):
-        self.do_request('create_order',
-                        expected_status=exceptions.Forbidden,
-                        cleanup='order',
-                        name='create_order', type='key',
-                        meta={
-                            'name': 'create_orders_s',
-                            'algorithm': 'aes',
-                            'bit_length': 256,
-                            'mode': 'cbc',
-                        })
-
-    def test_get_order(self):
-        resp = self.do_request(
-            'create_order',
-            client=self.os_project_member.secret_v1.OrderClient(),
-            cleanup='order',
-            name='get_order', type='key',
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.create_order,
+            name='test_create_order', type='key',
             meta={
-                'name': 'get_order_s',
-                'algorithm': 'aes',
-                'bit_length': 256,
-                'mode': 'cbc',
-            }
-        )
-        order_id = self.ref_to_uuid(resp['order_ref'])
-        self.do_request('get_order', expected_status=exceptions.Forbidden,
-                        order_id=order_id)
-
-    def test_delete_order(self):
-        resp = self.do_request(
-            'create_order',
-            client=self.os_project_member.secret_v1.OrderClient(),
-            cleanup='order',
-            name='delete_order', type='key',
-            meta={
-                'name': 'delete_order_s',
+                'name': 'create_orders_s',
                 'algorithm': 'aes',
                 'bit_length': 256,
                 'mode': 'cbc',
             })
-        order_id = self.ref_to_uuid(resp['order_ref'])
-        self.do_request('delete_order', expected_status=exceptions.Forbidden,
-                        order_id=order_id)
+
+    def test_get_order(self):
+        order_id = self.create_key_order('test_get_order')
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_order,
+            order_id=order_id)
+
+    def test_delete_order(self):
+        order_id = self.create_key_order('test_delete_order')
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_order,
+            order_id=order_id)

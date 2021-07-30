@@ -80,3 +80,6 @@ class ContainerClient(base.BarbicanTempestClient):
         )
         self.expected_success(204, response.status)
         return
+
+    def queue_for_cleanup(self, container_id):
+        raise NotImplementedError

@@ -127,24 +127,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     def setup_clients(cls):
         super().setup_clients()
 
-        # set up member clients
-        os = cls.os_project_member
-        cls.secret_client = os.secret_v1.SecretClient()
-        cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
-            service='key-manager'
-        )
-        cls.consumer_client = os.secret_v1.ConsumerClient(
-            service='key-manager'
-        )
-        cls.container_client = os.secret_v1.ContainerClient()
-        cls.order_client = os.secret_v1.OrderClient()
-        cls.quota_client = os.secret_v1.QuotaClient()
-        cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
-            service='key-manager'
-        )
-
         # setup clients for admin persona
-        # this client is used for any cleanup/setup etc. as needed
         adm = cls.os_project_admin
         cls.admin_secret_client = adm.secret_v1.SecretClient()
         cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient(
@@ -154,11 +137,29 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             service='key-manager'
         )
         cls.admin_container_client = adm.secret_v1.ContainerClient()
-        cls.admin_order_client = adm.secret_v1.OrderClient()
+        cls.admin_order_client = adm.secret_v1.OrderClient(
+            secret_client=cls.admin_secret_client,
+            container_client=cls.admin_container_client
+        )
         cls.admin_quota_client = adm.secret_v1.QuotaClient()
-        cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient(
+
+        # set clients for member persona
+        member = cls.os_project_member
+        cls.secret_client = member.secret_v1.SecretClient()
+        cls.secret_metadata_client = member.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
+        cls.consumer_client = member.secret_v1.ConsumerClient(
+            service='key-manager'
+        )
+        cls.container_client = member.secret_v1.ContainerClient()
+        cls.order_client = member.secret_v1.OrderClient(
+            secret_client=cls.secret_client,
+            container_client=cls.container_client
+        )
+        cls.quota_client = member.secret_v1.QuotaClient()
+        # set up clients for member persona associated with a different
+        # project
         cls.other_client = cls.os_project_alt_member.secret_v1.SecretClient()
 
     @classmethod
@@ -173,17 +174,17 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             for container_uuid in list(cls.created_objects['container']):
                 cls.admin_container_client.delete_container(container_uuid)
                 cls.created_objects['container'].remove(container_uuid)
-            for order_uuid in list(cls.created_objects['order']):
-                cls.admin_order_client.delete_order(order_uuid)
-                cls.created_objects['order'].remove(order_uuid)
             for quota_uuid in list(cls.created_objects['quota']):
                 cls.admin_quota_client.delete_project_quota(quota_uuid)
                 cls.created_objects['quota'].remove(quota_uuid)
             for secret_uuid in list(cls.created_objects['secret']):
                 cls.admin_secret_client.delete_secret(secret_uuid)
                 cls.created_objects['secret'].remove(secret_uuid)
+
             for client in [cls.secret_client,
+                           cls.order_client,
                            cls.admin_secret_client,
+                           cls.admin_order_client,
                            cls.other_client]:
                 client.cleanup()
         finally:
@@ -193,13 +194,6 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     def add_cleanup(cls, resource, response):
         if resource == 'container':
             uuid = cls.ref_to_uuid(response['container_ref'])
-        if resource == 'order':
-            uuid = cls.ref_to_uuid(response.get('order_ref'))
-            order_metadata = cls.admin_order_client.get_order(uuid)
-            secret_ref = order_metadata.get('secret_ref')
-            if secret_ref:
-                cls.created_objects['secret'].add(cls.ref_to_uuid(secret_ref))
-            uuid = cls.ref_to_uuid(response['order_ref'])
         if resource == 'quota':
             uuid = cls.ref_to_uuid(response['quota_ref'])
         if resource == 'secret':
@@ -261,3 +255,25 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             kwargs['payload_content_type'] = 'text/plain'
         resp = self.other_client.create_secret(**kwargs)
         return self.other_client.ref_to_uuid(resp['secret_ref'])
+
+    def create_key_order(self, name=None):
+        """Create a symmetric key order for testing
+
+        The new order is created using the default
+        member persona.
+
+        :returns: the uuid for the new order
+        """
+        meta = {
+            'algorithm': 'AES',
+            'bit_length': 256,
+            'mode': 'CBC'
+        }
+        if name is not None:
+            meta['name'] = name
+        kwargs = {
+            'type': 'key',
+            'meta': meta
+        }
+        resp = self.order_client.create_order(**kwargs)
+        return self.order_client.ref_to_uuid(resp['order_ref'])
