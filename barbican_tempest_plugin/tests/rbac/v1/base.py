@@ -73,14 +73,13 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             data_utils.rand_name()
         )['project']['id']
         cls._created_projects.append(project_id)
-        setattr(cls, 'os_project_admin',
-                cls._setup_new_user_client(project_id, 'admin'))
-        setattr(cls, 'os_project_member',
-                cls._setup_new_user_client(project_id, 'member'))
-        setattr(cls, 'os_project_reader',
-                cls._setup_new_user_client(project_id, 'reader'))
-        setattr(cls, 'os_project_other_member',
-                cls._setup_new_user_client(project_id, 'member'))
+        cls.os_project_admin = cls._setup_new_user_client(project_id, 'admin')
+        cls.os_project_member = cls._setup_new_user_client(project_id,
+                                                           'member')
+        cls.os_project_other_member = cls._setup_new_user_client(project_id,
+                                                                 'member')
+        cls.os_project_reader = cls._setup_new_user_client(project_id,
+                                                           'reader')
 
     @classmethod
     def _setup_new_user_client(cls, project_id, role):
@@ -158,9 +157,18 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             container_client=cls.container_client
         )
         cls.quota_client = member.secret_v1.QuotaClient()
+
         # set up clients for member persona associated with a different
         # project
-        cls.other_client = cls.os_project_alt_member.secret_v1.SecretClient()
+        cls.other_secret_client = \
+            cls.os_project_alt_member.secret_v1.SecretClient()
+        cls.other_container_client = \
+            cls.os_project_alt_member.secret_v1.ContainerClient()
+        cls.other_order_client = \
+            cls.os_project_alt_member.secret_v1.OrderClient(
+                secret_client=cls.other_secret_client,
+                container_client=cls.other_container_client
+            )
 
     @classmethod
     def resource_setup(cls):
@@ -185,7 +193,8 @@ class BarbicanV1RbacBase(test.BaseTestCase):
                            cls.order_client,
                            cls.admin_secret_client,
                            cls.admin_order_client,
-                           cls.other_client]:
+                           cls.other_secret_client,
+                           cls.other_order_client]:
                 client.cleanup()
         finally:
             super(BarbicanV1RbacBase, cls).resource_cleanup()
@@ -253,27 +262,25 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         if payload is not None:
             kwargs['payload'] = payload
             kwargs['payload_content_type'] = 'text/plain'
-        resp = self.other_client.create_secret(**kwargs)
-        return self.other_client.ref_to_uuid(resp['secret_ref'])
+        resp = self.other_secret_client.create_secret(**kwargs)
+        return self.other_secret_client.ref_to_uuid(resp['secret_ref'])
 
-    def create_key_order(self, name=None):
+    def create_test_order(self, client, order_name):
         """Create a symmetric key order for testing
 
-        The new order is created using the default
-        member persona.
+        The new order is created using the given
+        client.
 
         :returns: the uuid for the new order
         """
-        meta = {
-            'algorithm': 'AES',
-            'bit_length': 256,
-            'mode': 'CBC'
-        }
-        if name is not None:
-            meta['name'] = name
         kwargs = {
             'type': 'key',
-            'meta': meta
+            'meta': {
+                'name': order_name,
+                'algorithm': 'AES',
+                'bit_length': 256,
+                'mode': 'CBC',
+            }
         }
-        resp = self.order_client.create_order(**kwargs)
-        return self.order_client.ref_to_uuid(resp['order_ref'])
+        resp = client.create_order(**kwargs)
+        return client.ref_to_uuid(resp['order_ref'])

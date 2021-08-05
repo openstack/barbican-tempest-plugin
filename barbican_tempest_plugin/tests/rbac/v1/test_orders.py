@@ -58,45 +58,28 @@ class BarbicanV1RbacOrders:
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def test_get_other_project_order(self):
+        """Test get_order policy
 
-class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacOrders):
+        Testing GET /v1/orders/{order-id}
+        This test must check:
+          * whether persona can get order information
+            for an order that belongs to a different
+            project
+        """
+        raise NotImplementedError
 
-    @classmethod
-    def setup_clients(cls):
-        super().setup_clients()
-        cls.client = cls.os_project_member.secret_v1.OrderClient()
+    @abc.abstractmethod
+    def test_delete_other_project_order(self):
+        """Test delete_order policy
 
-    def test_list_orders(self):
-        _ = self.create_key_order('test_list_orders')
-        resp = self.client.list_orders()
-        self.assertGreaterEqual(len(resp['orders']), 1)
-
-    def test_create_order(self):
-        self.client.create_order(
-            name='create_order', type='key',
-            meta={
-                'name': 'create_orders_s',
-                'algorithm': 'aes',
-                'bit_length': 256,
-                'mode': 'cbc',
-            })
-
-    def test_get_order(self):
-        order_id = self.create_key_order('test_get_order')
-        resp = self.client.get_order(order_id)
-        self.assertEqual(order_id, self.client.ref_to_uuid(resp['order_ref']))
-
-    def test_delete_order(self):
-        order_id = self.create_key_order('test_delete_order')
-        self.client.delete_order(order_id)
-
-
-class ProjectAdminTests(ProjectMemberTests):
-
-    @classmethod
-    def setup_clients(cls):
-        super().setup_clients()
-        cls.client = cls.os_project_admin.secret_v1.OrderClient()
+        Testing DELETE /v1/orders/{order-id}
+        This test must check:
+          * whether persona can delete orders
+            that belong to a different project
+        """
+        raise NotImplementedError
 
 
 class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacOrders):
@@ -112,25 +95,74 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacOrders):
     def test_create_order(self):
         self.assertRaises(
             exceptions.Forbidden,
-            self.client.create_order,
-            name='test_create_order', type='key',
-            meta={
-                'name': 'create_orders_s',
-                'algorithm': 'aes',
-                'bit_length': 256,
-                'mode': 'cbc',
-            })
+            self.create_test_order,
+            self.client,
+            'create_orders_s'
+        )
 
     def test_get_order(self):
-        order_id = self.create_key_order('test_get_order')
+        order_id = self.create_test_order(self.order_client, 'test_get_order')
         self.assertRaises(
             exceptions.Forbidden,
             self.client.get_order,
             order_id=order_id)
 
     def test_delete_order(self):
-        order_id = self.create_key_order('test_delete_order')
+        order_id = self.create_test_order(self.order_client,
+                                          'test_delete_order')
         self.assertRaises(
             exceptions.Forbidden,
             self.client.delete_order,
             order_id=order_id)
+
+    def test_get_other_project_order(self):
+        order_id = self.create_test_order(
+            self.other_order_client,
+            'test_get_other_project_order')
+        self.assertRaises(
+            exceptions.NotFound,
+            self.client.get_order,
+            order_id)
+
+    def test_delete_other_project_order(self):
+        order_id = self.create_test_order(
+            self.other_order_client,
+            'test_delete_other_project_order')
+        self.assertRaises(
+            exceptions.NotFound,
+            self.client.delete_order,
+            order_id)
+
+
+class ProjectMemberTests(ProjectReaderTests):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.os_project_member.secret_v1.OrderClient()
+
+    def test_list_orders(self):
+        _ = self.create_test_order(self.order_client, 'test_list_orders')
+        resp = self.client.list_orders()
+        self.assertGreaterEqual(len(resp['orders']), 1)
+
+    def test_create_order(self):
+        self.create_test_order(self.client, 'create_orders_s')
+
+    def test_get_order(self):
+        order_id = self.create_test_order(self.order_client, 'test_get_order')
+        resp = self.client.get_order(order_id)
+        self.assertEqual(order_id, self.client.ref_to_uuid(resp['order_ref']))
+
+    def test_delete_order(self):
+        order_id = self.create_test_order(self.order_client,
+                                          'test_delete_order')
+        self.client.delete_order(order_id)
+
+
+class ProjectAdminTests(ProjectMemberTests):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.os_project_admin.secret_v1.OrderClient()
