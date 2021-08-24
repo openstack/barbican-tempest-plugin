@@ -144,7 +144,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         )
 
         # setup clients for admin persona
-        # this client is used for any cleanupi/setup etc. as needed
+        # this client is used for any cleanup/setup etc. as needed
         adm = cls.os_project_admin
         cls.admin_secret_client = adm.secret_v1.SecretClient()
         cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient(
@@ -229,6 +229,14 @@ class BarbicanV1RbacBase(test.BaseTestCase):
     def create_empty_secret_admin(self, secret_name):
         """add empty secret as admin user """
         return self.admin_secret_client.create_secret(name=secret_name)
+
+    def create_empty_container_admin(self,
+                                     container_name,
+                                     container_type='generic'):
+        """add empty container as admin user"""
+        return self.admin_container_client.create_container(
+            name=container_name,
+            type=container_type)
 
     def create_aes_secret_admin(self, secret_name):
         key = create_aes_key()
