@@ -42,69 +42,149 @@ class BarbicanV1RbacQuota:
 
     @abc.abstractmethod
     def test_get_custom_quota_for_project(self):
-        """Test getting a custom quota for a specific project
+        """Test getting a custom quota for the persona's project
 
         Testing: GET /v1/project-quotas/{project-id}
         This test must check:
-          * whether the persona can retrieve the custom quota for a
-            specific project.
+          * whether the persona can retrieve the custom quota for
+            the project in the persona's credentials.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def test_set_new_quota_for_project(self):
-        """Test setting a custom quota for a specific project
+        """Test setting a custom quota for the persona's project
 
         Testing: PUT /v1/project-quotas/{project-id}
         This test must check:
-          * whether the persona can create custom quotas for a
-            specific project.
+          * whether the persona can create custom quotas for
+            the project in the persona's credentials.
         """
         raise NotImplementedError
 
     @abc.abstractmethod
     def test_remove_custom_quota_for_project(self):
-        """Test removing a custom quota for a specific project
+        """Test removing a custom quota for the persona's project
+
+        Testing: DELETE /v1/project-quotas/{project-id}
+        This test must check:
+          * whether the persona can delete custom quotas for
+            the project in the persona's credentials.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_get_custom_quota_for_other_project(self):
+        """Test getting a custom quota for a different project
+
+        Testing: GET /v1/project-quotas/{project-id}
+        This test must check:
+          * whether the persona can retrieve the custom quota for
+            a project that is different than the project in the
+            persona's credentials.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_set_new_quota_for_other_project(self):
+        """Test setting a custom quota for a different project
+
+        Testing: PUT /v1/project-quotas/{project-id}
+        This test must check:
+          * whether the persona can create custom quotas for a
+            project that is different than the project in the
+            persona's credentials.
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_remove_custom_quota_for_other_project(self):
+        """Test removing a custom quota for a different project
 
         Testing: DELETE /v1/project-quotas/{project-id}
         This test must check:
           * whether the persona can delete custom quotas for a
-            specific project.
+            project that is different than the project in the
+            persona's credentials.
         """
         raise NotImplementedError
 
 
-class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
+class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.client = cls.os_project_reader.secret_v1.QuotaClient()
+
+    def test_get_effective_project_quota(self):
+        resp = self.client.get_default_project_quota()
+        self.assertIn('quotas', resp)
+
+    def test_list_project_quotas(self):
+        self.assertRaises(exceptions.Forbidden, self.client.list_quotas)
+
+    def test_get_custom_quota_for_project(self):
+        project_id = self.client.tenant_id
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_project_quota,
+            project_id)
+
+    def test_set_new_quota_for_project(self):
+        project_id = self.client.tenant_id
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.create_project_quota,
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            }
+        )
+
+    def test_remove_custom_quota_for_project(self):
+        project_id = self.client.tenant_id
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_project_quota,
+            project_id)
+
+    def test_get_custom_quota_for_other_project(self):
+        project_id = self.other_secret_client.tenant_id
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_project_quota,
+            project_id)
+
+    def test_set_new_quota_for_other_project(self):
+        project_id = self.other_secret_client.tenant_id
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.create_project_quota,
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            }
+        )
+
+    def test_remove_custom_quota_for_other_project(self):
+        project_id = self.other_secret_client.tenant_id
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_project_quota,
+            project_id)
+
+
+class ProjectMemberTests(ProjectReaderTests):
 
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.os_project_member.secret_v1.QuotaClient()
-
-    def test_get_effective_project_quota(self):
-        resp = self.do_request('get_default_project_quota')
-        self.assertIn('quotas', resp)
-
-    def test_list_project_quotas(self):
-        self.do_request('list_quotas', expected_status=exceptions.Forbidden)
-
-    def test_get_custom_quota_for_project(self):
-        project_id = self.client.tenant_id
-        self.do_request('get_project_quota',
-                        expected_status=exceptions.Forbidden,
-                        project_id=project_id)
-
-    def test_set_new_quota_for_project(self):
-        project_id = self.client.tenant_id
-        self.do_request('create_project_quota',
-                        expected_status=exceptions.Forbidden,
-                        project_id=project_id)
-
-    def test_remove_custom_quota_for_project(self):
-        project_id = self.client.tenant_id
-        self.do_request('delete_project_quota',
-                        expected_status=exceptions.Forbidden,
-                        project_id=project_id)
 
 
 class ProjectAdminTests(ProjectMemberTests):
@@ -113,11 +193,3 @@ class ProjectAdminTests(ProjectMemberTests):
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.os_project_admin.secret_v1.QuotaClient()
-
-
-class ProjectReaderTests(ProjectMemberTests):
-
-    @classmethod
-    def setup_clients(cls):
-        super().setup_clients()
-        cls.client = cls.os_project_reader.secret_v1.QuotaClient()
