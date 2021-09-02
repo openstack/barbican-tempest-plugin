@@ -63,6 +63,7 @@
           $BARBICAN_CONF:
             oslo_policy:
               enforce_new_defaults: True
+              enforce_scope: True
         test-config:
           $TEMPEST_CONFIG:
             # FIXME(redrobot): Tempest errors out when you try to create a

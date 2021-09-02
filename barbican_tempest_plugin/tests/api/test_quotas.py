@@ -24,7 +24,7 @@ class QuotasTest(base.BaseKeyManagerTest):
     """Quotas API tests."""
 
     @decorators.idempotent_id('47ebc42b-0e53-4060-b1a1-55bee2c7c43f')
-    def test_create_get_delete_quota(self):
+    def test_get_effective_quota(self):
         # Verify the default quota settings
         body = self.quota_client.get_default_project_quota()
         quotas = body.get('quotas')
@@ -34,6 +34,20 @@ class QuotasTest(base.BaseKeyManagerTest):
         self.assertEqual(-1, quotas.get('containers'))
         self.assertEqual(-1, quotas.get('consumers'))
 
+
+class ProjectQuotasTest(base.BaseKeyManagerTest):
+
+    @classmethod
+    def skip_checks(cls):
+        super().skip_checks()
+        if CONF.barbican_rbac_scope_verification.enforce_scope:
+            # These tests can't be run with the new RBAC rules because
+            # the APIs they're testing require system-scoped credentials
+            # instead of the project-scoped credentials used here.
+            raise cls.skipException("enforce_scope is enabled for barbican, "
+                                    "skipping project quota tests.")
+
+    def test_manage_project_quotas(self):
         # Confirm that there are no quotas
         body = self.quota_client.list_quotas()
         self.assertEqual(0, body.get('total'), body)
