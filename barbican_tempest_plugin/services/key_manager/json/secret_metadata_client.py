@@ -16,16 +16,18 @@
 import json
 
 from tempest import config
-from tempest.lib.common import rest_client
+
+from barbican_tempest_plugin.services.key_manager.json import base
 
 CONF = config.CONF
 
 
-class SecretMetadataClient(rest_client.RestClient):
+class SecretMetadataClient(base.BarbicanTempestClient):
 
     def get_secret_metadata(self, secret_id):
         resp, body = self.get("v1/secrets/%s/metadata" % secret_id)
         self.expected_success(200, resp.status)
+        # Note: "metadata" top level key gets dropped by _parse_resp()
         return self._parse_resp(body)
 
     def put_secret_metadata(self, secret_id, **kwargs):
@@ -33,6 +35,7 @@ class SecretMetadataClient(rest_client.RestClient):
         uri = "v1/secrets/%s/metadata" % secret_id
         resp, body = self.put(uri, json.dumps(body_dict))
         self.expected_success(201, resp.status)
+        # Note: "metadata" top level key gets dropped by _parse_resp()
         return self._parse_resp(body)
 
     def get_secret_metadata_by_key(self, secret_id, key):

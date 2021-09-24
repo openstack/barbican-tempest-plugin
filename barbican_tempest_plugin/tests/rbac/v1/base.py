@@ -129,9 +129,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         # setup clients for admin persona
         adm = cls.os_project_admin
         cls.admin_secret_client = adm.secret_v1.SecretClient()
-        cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient(
-            service='key-manager'
-        )
+        cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient()
         cls.admin_consumer_client = adm.secret_v1.ConsumerClient(
             service='key-manager'
         )
@@ -145,9 +143,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         # set clients for member persona
         member = cls.os_project_member
         cls.secret_client = member.secret_v1.SecretClient()
-        cls.secret_metadata_client = member.secret_v1.SecretMetadataClient(
-            service='key-manager'
-        )
+        cls.secret_metadata_client = member.secret_v1.SecretMetadataClient()
         cls.consumer_client = member.secret_v1.ConsumerClient(
             service='key-manager'
         )
@@ -162,6 +158,8 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         # project
         cls.other_secret_client = \
             cls.os_project_alt_member.secret_v1.SecretClient()
+        cls.other_secret_metadata_client = \
+            cls.os_project_alt_member.secret_v1.SecretMetadataClient()
         cls.other_container_client = \
             cls.os_project_alt_member.secret_v1.ContainerClient()
         cls.other_order_client = \
@@ -264,6 +262,24 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             kwargs['payload_content_type'] = 'text/plain'
         resp = self.other_secret_client.create_secret(**kwargs)
         return self.other_secret_client.ref_to_uuid(resp['secret_ref'])
+
+    def create_test_secret(self, client, name, payload=None):
+        """Create a secret for testing
+
+        The new secret is created using the given client.  If no
+        payload is given, the secret is left empty.
+
+        :returns: the uuid for the new secret
+        """
+        kwargs = {
+            'name': name,
+            'secret_type': 'passphrase'
+        }
+        if payload is not None:
+            kwargs['payload'] = payload
+            kwargs['payload_content_type'] = 'text/plain'
+        resp = client.create_secret(**kwargs)
+        return client.ref_to_uuid(resp['secret_ref'])
 
     def create_test_order(self, client, order_name):
         """Create a symmetric key order for testing
