@@ -93,6 +93,34 @@ class SecretClient(base.BarbicanTempestClient):
         self.expected_success(204, resp.status)
         return body
 
+    def get_secret_acl(self, secret_id):
+        headers = {
+            'Accept': 'application/json'
+        }
+        resp, body = self.get('v1/secrets/{}/acl'.format(secret_id),
+                              headers=headers)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def put_secret_acl(self, secret_id, acl):
+        req_body = json.dumps(acl)
+        resp, body = self.put('v1/secrets/{}/acl'.format(secret_id),
+                              req_body)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def patch_secret_acl(self, secret_id, acl):
+        req_body = json.dumps(acl)
+        resp, body = self.patch('v1/secrets/{}/acl'.format(secret_id),
+                                req_body)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def delete_secret_acl(self, secret_id):
+        resp, body = self.delete('v1/secrets/{}/acl'.format(secret_id))
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
     def queue_for_cleanup(self, secret_id):
         self._secret_ids.add(secret_id)
 

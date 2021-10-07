@@ -16,6 +16,7 @@ from datetime import datetime
 from datetime import timedelta
 
 from tempest import config
+from tempest.lib.common.utils import data_utils
 from tempest.lib import exceptions
 
 from barbican_tempest_plugin.tests.rbac.v1 import base as rbac_base
@@ -131,6 +132,82 @@ class BarbicanV1RbacSecrets:
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def test_get_secret_acl(self):
+        """Test GET /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can get the ACL for a secret
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_put_secret_acl(self):
+        """Test PUT /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can overwrite the ACL for a secret
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_patch_secret_acl(self):
+        """Test PATCH /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can modify the ACL for a secret
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_delete_secret_acl(self):
+        """Test DELETE /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can delete the ACL for a secret
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_get_other_secret_acl(self):
+        """Test GET /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can get the ACL for a secret
+            that belongs to a different project
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_put_other_secret_acl(self):
+        """Test PUT /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can overwrite the ACL for a secret
+            that belongs to a different project
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_patch_other_secret_acl(self):
+        """Test PATCH /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can modify the ACL for a secret
+            that belongs to a different project
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_delete_other_secret_acl(self):
+        """Test DELETE /v1/secrets/{secret_id}/acl policy
+
+        This test must check:
+          * whether the persona can delete the ACL for a secret
+            that belongs to a different project
+        """
+        raise NotImplementedError
+
 
 class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
 
@@ -138,6 +215,23 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.os_project_reader.secret_v1.SecretClient()
+
+    def setUp(self):
+        super().setUp()
+        self.secret_id = self.create_test_secret(
+            self.secret_client,
+            data_utils.rand_name('test-secrets'),
+            'THIS_IS_A_SECRET_PASSPHRASE')
+        self.other_secret_id = self.create_test_secret(
+            self.other_secret_client,
+            data_utils.rand_name('test-secrets'),
+            'THIS_IS_SOMEONE_ELSES_SECRET_PASSPHRASE')
+        self.valid_acl = {
+            "read": {
+                "users": [self.other_secret_client.user_id],
+                "project-access": True
+            }
+        }
 
     def test_create_secret(self):
         """Test add_secret policy."""
@@ -259,13 +353,65 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
             self.client.delete_secret,
             other_secret_id)
 
+    def test_get_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_secret_acl,
+            self.secret_id)
+
+    def test_put_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.put_secret_acl,
+            self.secret_id,
+            self.valid_acl)
+
+    def test_patch_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.patch_secret_acl,
+            self.secret_id,
+            self.valid_acl)
+
+    def test_delete_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_secret_acl,
+            self.secret_id)
+
+    def test_get_other_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_secret_acl,
+            self.other_secret_id)
+
+    def test_put_other_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.put_secret_acl,
+            self.other_secret_id,
+            self.valid_acl)
+
+    def test_patch_other_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.patch_secret_acl,
+            self.other_secret_id,
+            self.valid_acl)
+
+    def test_delete_other_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_secret_acl,
+            self.other_secret_id)
+
 
 class ProjectMemberTests(ProjectReaderTests):
 
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
-        cls.client = cls.os_project_member.secret_v1.SecretClient()
+        cls.client = cls.secret_client
 
     def test_create_secret(self):
         """Test add_secret policy."""
@@ -338,12 +484,45 @@ class ProjectMemberTests(ProjectReaderTests):
         payload = self.client.get_secret_payload(uuid)
         self.assertEqual(key, base64.b64encode(payload))
 
+    def test_get_secret_acl(self):
+        acl = self.client.get_secret_acl(self.secret_id)
+        self.assertIn("read", acl.keys())
+
+    def test_put_secret_acl(self):
+        _ = self.client.put_secret_acl(self.secret_id, self.valid_acl)
+        acl = self.client.get_secret_acl(self.secret_id)
+        self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+
+    def test_patch_secret_acl(self):
+        _ = self.client.put_secret_acl(self.secret_id, self.valid_acl)
+        acl = self.client.get_secret_acl(self.secret_id)
+        self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+        clear_users_acl = {
+            'read': {
+                'users': []
+            }
+        }
+        _ = self.client.patch_secret_acl(self.secret_id, clear_users_acl)
+        acl = self.client.get_secret_acl(self.secret_id)
+        self.assertNotIn(self.other_secret_client.user_id,
+                         acl['read']['users'])
+
+    def test_delete_secret_acl(self):
+        _ = self.client.put_secret_acl(self.secret_id, self.valid_acl)
+        acl = self.client.get_secret_acl(self.secret_id)
+        self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+
+        _ = self.client.delete_secret_acl(self.secret_id)
+
+        acl = self.client.get_secret_acl(self.secret_id)
+        self.assertNotIn('users', acl['read'].keys())
+
 
 class ProjectAdminTests(ProjectMemberTests):
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
-        cls.client = cls.os_project_admin.secret_v1.SecretClient()
+        cls.client = cls.admin_secret_client
 
 
 class SystemReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
@@ -381,6 +560,30 @@ class SystemReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
         pass
 
     def test_delete_other_project_secret(self):
+        pass
+
+    def test_get_secret_acl(self):
+        pass
+
+    def test_put_secret_acl(self):
+        pass
+
+    def test_patch_secret_acl(self):
+        pass
+
+    def test_delete_secret_acl(self):
+        pass
+
+    def test_get_other_secret_acl(self):
+        pass
+
+    def test_put_other_secret_acl(self):
+        pass
+
+    def test_patch_other_secret_acl(self):
+        pass
+
+    def test_delete_other_secret_acl(self):
         pass
 
 
