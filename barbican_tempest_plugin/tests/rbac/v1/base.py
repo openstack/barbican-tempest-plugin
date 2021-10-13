@@ -239,6 +239,16 @@ class BarbicanV1RbacBase(test.BaseTestCase):
             name=container_name,
             type=container_type)
 
+    def add_consumer_to_container_admin(self,
+                                        consumer_name,
+                                        consumer_url,
+                                        container_id):
+        """add consumer to container as admin user"""
+        return self.admin_consumer_client.add_consumer_to_container(
+            name=consumer_name,
+            URL=consumer_url,
+            container_id=container_id)
+
     def create_aes_secret_admin(self, secret_name):
         key = create_aes_key()
         expire_time = (datetime.utcnow() + timedelta(days=5))
@@ -300,3 +310,17 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         }
         resp = client.create_order(**kwargs)
         return client.ref_to_uuid(resp['order_ref'])
+
+    def create_test_container(self, client, name):
+        """Create a generic container for testing
+
+        The new container is created using the given client.
+
+        :returns: the uuid for the new container
+        """
+        container = {
+            "type": "generic",
+            "name": name,
+        }
+        resp = client.create_container(**container)
+        return client.ref_to_uuid(resp['container_ref'])

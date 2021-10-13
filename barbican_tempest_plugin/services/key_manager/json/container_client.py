@@ -81,5 +81,33 @@ class ContainerClient(base.BarbicanTempestClient):
         self.expected_success(204, response.status)
         return
 
+    def get_container_acl(self, container_id):
+        headers = {
+            'Accept': 'application/json'
+        }
+        resp, body = self.get('v1/containers/{}/acl'.format(container_id),
+                              headers=headers)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def put_container_acl(self, container_id, acl):
+        req_body = json.dumps(acl)
+        resp, body = self.put('v1/containers/{}/acl'.format(container_id),
+                              req_body)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def patch_container_acl(self, container_id, acl):
+        req_body = json.dumps(acl)
+        resp, body = self.patch('v1/containers/{}/acl'.format(container_id),
+                                req_body)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def delete_container_acl(self, container_id):
+        resp, body = self.delete('v1/containers/{}/acl'.format(container_id))
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
     def queue_for_cleanup(self, container_id):
         raise NotImplementedError
