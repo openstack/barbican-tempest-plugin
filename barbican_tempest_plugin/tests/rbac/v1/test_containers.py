@@ -65,9 +65,8 @@ class BarbicanV1RbacContainers:
 
     @abc.abstractmethod
     def test_get_container_acl(self):
-        """Test get_container_acl policy
+        """Test GET /v1/containers/{container-id}/acl
 
-        Testing: GET /v1/containers/{container-id}/acl
         This test must check:
           * whether the persona can get a containers acl
         """
@@ -75,9 +74,8 @@ class BarbicanV1RbacContainers:
 
     @abc.abstractmethod
     def test_update_container_acl(self):
-        """Test update_container_acl policy
+        """Test PATCH /v1/containers/{container-id}/acl
 
-        Testing: PATCH /v1/containers/{container-id}/acl
         This test must check:
           * whether the persona can update an existing containers acl
         """
@@ -85,9 +83,8 @@ class BarbicanV1RbacContainers:
 
     @abc.abstractmethod
     def test_create_container_acl(self):
-        """Test create_container_acl policy
+        """Test PUT /v1/containers/{container-id}/acl
 
-        Testing: PUT /v1/containers/{container-id}/acl
         This test must check:
           * whether the persona can create a containers acl
         """
@@ -95,9 +92,8 @@ class BarbicanV1RbacContainers:
 
     @abc.abstractmethod
     def test_delete_container_acl(self):
-        """Test delete_container_acl policy
+        """Test DELETE /v1/containers/{container-id}/acl
 
-        Testing: DELETE /v1/containers/{container-id}/acl
         This test must check:
           * whether the persona can delete a containers acl
         """
@@ -183,6 +179,12 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacContainers):
         self.container_id = self.create_test_container(
             self.container_client,
             data_utils.rand_name('test-containers'))
+        self.valid_acl = {
+            'read': {
+                'users': [self.other_secret_client.user_id],
+                'project-access': True
+            }
+        }
 
     def test_list_containers(self):
         self.assertRaises(
@@ -207,16 +209,30 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacContainers):
             container_id=self.container_id)
 
     def test_get_container_acl(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.get_container_acl,
+            self.container_id)
 
     def test_update_container_acl(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.patch_container_acl,
+            self.container_id,
+            self.valid_acl)
 
     def test_create_container_acl(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.put_container_acl,
+            self.container_id,
+            self.valid_acl)
 
     def test_delete_container_acl(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.client.delete_container,
+            self.container_id)
 
     def test_list_container_consumers(self):
         resp = self.create_empty_container_admin(
@@ -328,6 +344,42 @@ class ProjectMemberTests(ProjectReaderTests):
         secret_ids = [self.client.ref_to_uuid(sr['secret_ref'])
                       for sr in resp['secret_refs']]
         self.assertNotIn(self.secret_id, secret_ids)
+
+    def test_get_container_acl(self):
+        resp = self.client.get_container_acl(self.container_id)
+        self.assertIn('read', resp.keys())
+
+    def test_create_container_acl(self):
+        _ = self.client.put_container_acl(self.container_id, self.valid_acl)
+
+        acl = self.client.get_container_acl(self.container_id)
+        self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+
+    def test_update_container_acl(self):
+        _ = self.client.put_container_acl(self.container_id, self.valid_acl)
+        acl = self.client.get_container_acl(self.container_id)
+        self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+        clear_users_acl = {
+            'read': {
+                'users': []
+            }
+        }
+
+        _ = self.client.patch_container_acl(self.container_id, clear_users_acl)
+
+        acl = self.client.get_container_acl(self.container_id)
+        self.assertNotIn(self.other_secret_client.user_id,
+                         acl['read']['users'])
+
+    def test_delete_container_acl(self):
+        _ = self.client.put_container_acl(self.container_id, self.valid_acl)
+        acl = self.client.get_container_acl(self.container_id)
+        self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+
+        _ = self.client.delete_container_acl(self.container_id)
+
+        acl = self.client.get_container_acl(self.container_id)
+        self.assertNotIn('users', acl['read'].keys())
 
 
 class ProjectAdminTests(ProjectMemberTests):
