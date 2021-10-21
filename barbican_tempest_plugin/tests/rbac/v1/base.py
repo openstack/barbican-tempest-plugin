@@ -130,9 +130,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         adm = cls.os_project_admin
         cls.admin_secret_client = adm.secret_v1.SecretClient()
         cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient()
-        cls.admin_consumer_client = adm.secret_v1.ConsumerClient(
-            service='key-manager'
-        )
+        cls.admin_consumer_client = adm.secret_v1.ConsumerClient()
         cls.admin_container_client = adm.secret_v1.ContainerClient()
         cls.admin_order_client = adm.secret_v1.OrderClient(
             secret_client=cls.admin_secret_client,
@@ -144,9 +142,7 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         member = cls.os_project_member
         cls.secret_client = member.secret_v1.SecretClient()
         cls.secret_metadata_client = member.secret_v1.SecretMetadataClient()
-        cls.consumer_client = member.secret_v1.ConsumerClient(
-            service='key-manager'
-        )
+        cls.member_consumer_client = member.secret_v1.ConsumerClient()
         cls.container_client = member.secret_v1.ContainerClient()
         cls.order_client = member.secret_v1.OrderClient(
             secret_client=cls.secret_client,
@@ -238,16 +234,6 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         return self.admin_container_client.create_container(
             name=container_name,
             type=container_type)
-
-    def add_consumer_to_container_admin(self,
-                                        consumer_name,
-                                        consumer_url,
-                                        container_id):
-        """add consumer to container as admin user"""
-        return self.admin_consumer_client.add_consumer_to_container(
-            name=consumer_name,
-            URL=consumer_url,
-            container_id=container_id)
 
     def create_aes_secret_admin(self, secret_name):
         key = create_aes_key()
