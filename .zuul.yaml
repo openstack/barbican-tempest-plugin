@@ -6,10 +6,10 @@
       jobs:
         - barbican-tempest-plugin-simple-crypto
         - barbican-tempest-plugin-simple-crypto-secure-rbac
+        - barbican-tempest-plugin-simple-crypto-xena
         - barbican-tempest-plugin-simple-crypto-wallaby
         - barbican-tempest-plugin-simple-crypto-victoria
         - barbican-tempest-plugin-simple-crypto-ussuri
-        - barbican-tempest-plugin-simple-crypto-train
         - barbican-tempest-plugin-simple-crypto-ipv6-only
         - barbican-tempest-plugin-simple-crypto-castellan-src
         - barbican-tempest-plugin-simple-crypto-cursive
@@ -79,6 +79,11 @@
               enforce_scope: True
 
 - job:
+    name: barbican-tempest-plugin-simple-crypto-xena
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/xena
+
+- job:
     name: barbican-tempest-plugin-simple-crypto-wallaby
     parent: barbican-tempest-plugin-simple-crypto
     override-checkout: stable/wallaby
@@ -94,12 +99,6 @@
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-bionic
     override-checkout: stable/ussuri
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-train
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/train
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only
