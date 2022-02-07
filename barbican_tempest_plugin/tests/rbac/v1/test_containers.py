@@ -235,31 +235,10 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacContainers):
             self.container_id)
 
     def test_list_container_consumers(self):
-        resp = self.create_empty_container_admin(
-            'test_reader_list_container_consumers')
-        container_id = self.ref_to_uuid(resp['container_ref'])
-
-        resp = self.add_consumer_to_container_admin(
-            consumer_name='test_reader_list_container_consumer',
-            consumer_url=resp['container_ref'],
-            container_id=container_id)
-
-        self.assertRaises(
-            exceptions.Forbidden,
-            self.consumer_client.list_consumers_in_container,
-            container_id=container_id)
+        pass
 
     def test_create_container_consumer(self):
-        resp = self.create_empty_container_admin(
-            'test_reader_create_container_consumer_container')
-        container_id = self.ref_to_uuid(resp['container_ref'])
-
-        self.assertRaises(
-            exceptions.Forbidden,
-            self.consumer_client.add_consumer_to_container,
-            name='test_reader_create_container_consumer',
-            URL=resp['container_ref'],
-            container_id=container_id)
+        pass
 
     def test_get_container_consumer(self):
         pass
