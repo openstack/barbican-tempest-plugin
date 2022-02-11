@@ -168,6 +168,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacContainers):
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.os_project_reader.secret_v1.ContainerClient()
+        cls.consumer_client = cls.os_project_reader.secret_v1.ConsumerClient()
 
     def setUp(self):
         super().setUp()
@@ -185,6 +186,14 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacContainers):
                 'project-access': True
             }
         }
+        self.test_consumer = {
+            "name": "test-consumer",
+            "URL": "https://example.test/consumer"
+        }
+        self.member_consumer_client.add_consumer_to_container(
+            self.container_id,
+            **self.test_consumer
+        )
 
     def test_list_containers(self):
         self.assertRaises(
@@ -235,16 +244,24 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacContainers):
             self.container_id)
 
     def test_list_container_consumers(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.consumer_client.list_consumers_in_container,
+            self.container_id)
 
     def test_create_container_consumer(self):
-        pass
-
-    def test_get_container_consumer(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.consumer_client.add_consumer_to_container,
+            self.container_id,
+            **self.test_consumer)
 
     def test_delete_container_consumer(self):
-        pass
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.consumer_client.delete_consumer_from_container,
+            self.container_id,
+            **self.test_consumer)
 
     def test_add_secret_to_container(self):
         self.assertRaises(
@@ -267,6 +284,7 @@ class ProjectMemberTests(ProjectReaderTests):
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.container_client
+        cls.consumer_client = cls.member_consumer_client
 
     def test_list_containers(self):
         resp = self.client.list_containers()
@@ -360,6 +378,31 @@ class ProjectMemberTests(ProjectReaderTests):
         acl = self.client.get_container_acl(self.container_id)
         self.assertNotIn('users', acl['read'].keys())
 
+    def test_list_container_consumers(self):
+        resp = self.consumer_client.list_consumers_in_container(
+            self.container_id
+        )
+        self.assertEqual(1, resp['total'])
+
+    def test_create_container_consumer(self):
+        second_consumer = {
+            'name': 'another-test-consumer',
+            'URL': 'https://exlample.test/consumer/two'
+        }
+
+        resp = self.consumer_client.add_consumer_to_container(
+            self.container_id,
+            **second_consumer)
+
+        self.assertEqual(2, len(resp['consumers']))
+
+    def test_delete_container_consumer(self):
+        resp = self.consumer_client.delete_consumer_from_container(
+            self.container_id,
+            **self.test_consumer)
+
+        self.assertEqual(0, len(resp['consumers']))
+
 
 class ProjectAdminTests(ProjectMemberTests):
 
@@ -367,6 +410,7 @@ class ProjectAdminTests(ProjectMemberTests):
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.admin_container_client
+        cls.consumer_client = cls.admin_consumer_client
 
 
 class ProjectReaderTestsAcrossProjects(ProjectReaderTests):

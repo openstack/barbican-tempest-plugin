@@ -18,12 +18,14 @@ import json
 from urllib import parse as urllib
 
 from tempest import config
-from tempest.lib.common import rest_client
+
+from barbican_tempest_plugin.services.key_manager.json import base
+
 
 CONF = config.CONF
 
 
-class ConsumerClient(rest_client.RestClient):
+class ConsumerClient(base.BarbicanTempestClient):
 
     def list_consumers_in_container(self, container_id, **kwargs):
         uri = "/v1/containers/%s/consumers" % container_id
