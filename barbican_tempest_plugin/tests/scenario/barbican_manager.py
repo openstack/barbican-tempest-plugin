@@ -111,8 +111,6 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         )
 
         if CONF.compute_feature_enabled.attach_encrypted_volume:
-            cls.admin_volume_types_client =\
-                os_adm.volume_types_v2_client
             cls.admin_encryption_types_client =\
                 os_adm.encryption_types_v2_client
 
