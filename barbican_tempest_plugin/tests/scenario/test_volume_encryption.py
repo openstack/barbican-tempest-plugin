@@ -80,12 +80,14 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         timestamp = self.create_timestamp(
             server_ip,
             dev_name=CONF.compute.volume_device_name,
-            private_key=keypair['private_key']
+            private_key=keypair['private_key'],
+            server=server
         )
         timestamp2 = self.get_timestamp(
             server_ip,
             dev_name=CONF.compute.volume_device_name,
-            private_key=keypair['private_key']
+            private_key=keypair['private_key'],
+            server=server
         )
         self.assertEqual(timestamp, timestamp2)
 
