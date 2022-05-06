@@ -48,6 +48,9 @@
               api_v1: False
             ephemeral_storage_encryption:
               enabled: True
+            key_manager:
+              min_microversion: '1.0'
+              max_microversion: latest
       tox_envlist: all
       tempest_test_regex: barbican
       tempest_plugins:
@@ -72,16 +75,25 @@
     name: barbican-tempest-plugin-simple-crypto-yoga
     parent: barbican-tempest-plugin-simple-crypto
     override-checkout: stable/yoga
+    vars: &microversion_v1_0
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            key_manager:
+              min_microversion: '1.0'
+              max_microversion: '1.0'
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-xena
     parent: barbican-tempest-plugin-simple-crypto
     override-checkout: stable/xena
+    vars: *microversion_v1_0
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-wallaby
     parent: barbican-tempest-plugin-simple-crypto
     override-checkout: stable/wallaby
+    vars: *microversion_v1_0
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only

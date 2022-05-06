@@ -20,6 +20,32 @@ service_option = cfg.BoolOpt("barbican",
                              help="Whether or not barbican is expected to be "
                                   "available")
 
+key_manager_group = cfg.OptGroup(
+    name='key_manager',
+    title='Key Manager (Barbican) service options'
+)
+
+KeyManagerOpts = [
+    cfg.StrOpt('min_microversion',
+               default=None,
+               help="Lower version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Tempest selects tests based on the range between "
+                    "min_microversion and max_microversion. "
+                    "If both values are not specified, Tempest avoids tests "
+                    "which require a microversion. Valid values are string "
+                    "with format 'X.Y' or string 'latest'"),
+    cfg.StrOpt('max_microversion',
+               default=None,
+               help="Upper version of the test target microversion range. "
+                    "The format is 'X.Y', where 'X' and 'Y' are int values. "
+                    "Tempest selects tests based on the range between "
+                    "min_microversion and max_microversion. "
+                    "If both values are not specified, Tempest avoids tests "
+                    "which require a microversion. Valid values are string "
+                    "with format 'X.Y' or string 'latest'")
+]
+
 barbican_tempest_group = cfg.OptGroup(
     name='barbican_tempest',
     title='Key Manager (Barbican) service options'

@@ -106,9 +106,11 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         )
         cls.order_client = os.secret_v1.OrderClient(service='key-manager')
         cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
+        cls.secret_consumer_client = os.secret_v1_1.SecretConsumerClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
+        cls.secret_consumer_client = os.secret_v1_1.VersionClient()
 
         if CONF.compute_feature_enabled.attach_encrypted_volume:
             cls.admin_encryption_types_client =\

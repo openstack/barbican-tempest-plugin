@@ -33,6 +33,10 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
         conf.register_opt(project_config.service_option,
                           group='service_available')
 
+        conf.register_group(project_config.key_manager_group)
+        conf.register_opts(project_config.KeyManagerOpts,
+                           project_config.key_manager_group)
+
         conf.register_group(project_config.barbican_tempest_group)
         conf.register_opts(project_config.BarbicanGroupOpts,
                            project_config.barbican_tempest_group)
@@ -69,4 +73,13 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
                 'TransportKeyClient'
             ],
         }
-        return [v1_params]
+        v1_1_params = {
+            'name': 'secret_v1_1',
+            'service_version': 'secret.v1_1',
+            'module_path': 'barbican_tempest_plugin.services.key_manager.v1_1',
+            'client_names': [
+                'SecretConsumerClient',
+                'VersionClient'
+            ],
+        }
+        return [v1_params, v1_1_params]

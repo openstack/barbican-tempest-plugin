@@ -16,6 +16,7 @@
 import functools
 
 from tempest import config
+from tempest.lib.common import api_version_utils
 from tempest import test
 
 from barbican_tempest_plugin import clients
@@ -56,13 +57,23 @@ def creates(resource):
     return decorator
 
 
-class BaseKeyManagerTest(test.BaseTestCase):
+class BaseKeyManagerTest(test.BaseTestCase,
+                         api_version_utils.BaseMicroversionTest):
     """Base class for all api tests."""
 
     # Why do I have to be an admin to create secrets? No idea...
     credentials = ('admin', ['service_admin', 'key-manager:service-admin'])
     client_manager = clients.Clients
     created_objects = {}
+
+    @classmethod
+    def skip_checks(cls):
+        super().skip_checks()
+        api_version_utils.check_skip_with_microversion(
+            cls.min_microversion,
+            cls.max_microversion,
+            CONF.key_manager.min_microversion,
+            CONF.key_manager.max_microversion)
 
     @classmethod
     def setup_clients(cls):
@@ -76,9 +87,11 @@ class BaseKeyManagerTest(test.BaseTestCase):
         )
         cls.order_client = os.secret_v1.OrderClient(service='key-manager')
         cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
+        cls.secret_consumer_client = os.secret_v1_1.SecretConsumerClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
             service='key-manager'
         )
+        cls.version_client = os.secret_v1_1.VersionClient()
 
         os = getattr(cls, 'os_roles_%s' % cls.credentials[1][0])
         cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')

@@ -13,13 +13,23 @@ from tempest.lib.common import rest_client
 
 
 _DEFAULT_SERVICE_TYPE = 'key-manager'
+_MICROVERSION_HEADER = 'OpenStack-API-Version'
 
 
 class BarbicanTempestClient(rest_client.RestClient):
 
+    _microversion = None
+
     def __init__(self, *args, **kwargs):
         kwargs['service'] = _DEFAULT_SERVICE_TYPE
         super().__init__(*args, **kwargs)
+
+    def get_headers(self, accept_type=None, send_type=None):
+        headers = super().get_headers(accept_type, send_type)
+        if self._microversion:
+            headers[_MICROVERSION_HEADER] = \
+                f'{_DEFAULT_SERVICE_TYPE} {self._microversion}'
+        return headers
 
     @classmethod
     def ref_to_uuid(cls, href):
