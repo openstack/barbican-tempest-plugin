@@ -21,6 +21,7 @@ from tempest.lib import exceptions
 
 from barbican_tempest_plugin.tests.rbac.v1 import base as rbac_base
 
+
 CONF = config.CONF
 
 
@@ -209,7 +210,40 @@ class BarbicanV1RbacSecrets:
         raise NotImplementedError
 
 
-class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
+class BarbicanV1_1SecretConsumers:
+
+    @abc.abstractmethod
+    def test_list_secret_consumers(self):
+        """Test list_secret_consumers policy
+
+        Testing: GET /v1/secrets/{secret-id}/consumers
+        This test must check:
+          * whether the persona can list a secrets consumers
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_create_secret_consumer(self):
+        """Test create_secret_consumer policy
+
+        Testing: POST /v1/secrets/{secret-id}/consumers
+        This test must check:
+          * whether the persona can create a consumer of the secret
+        """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def test_delete_secret_consumer(self):
+        """Test delete_secret_consumer policy
+
+        Testing: DELETE /v1/secrets/{secret-id}/consumers
+        This test must check:
+          * whether the persona can delete a consumer of the secret
+        """
+        raise NotImplementedError
+
+
+class ProjectReaderBase(rbac_base.BarbicanV1RbacBase):
 
     @classmethod
     def setup_clients(cls):
@@ -232,6 +266,9 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
                 "project-access": True
             }
         }
+
+
+class ProjectReaderTests(ProjectReaderBase, BarbicanV1RbacSecrets):
 
     def test_create_secret(self):
         """Test add_secret policy."""
@@ -406,6 +443,49 @@ class ProjectReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):
             self.other_secret_id)
 
 
+class ProjectReaderV1_1Tests(ProjectReaderBase, BarbicanV1_1SecretConsumers):
+
+    min_microversion = '1.1'
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.secret_consumer_client = \
+            cls.os_project_reader.secret_v1_1.SecretConsumerClient()
+
+    def setUp(self):
+        super().setUp()
+        self.test_consumer = {
+            "service": "service1",
+            "resource_id": "resource_id1",
+            "resource_type": "resource_type1"
+        }
+        self.member_secret_consumer_client.add_consumer_to_secret(
+            self.secret_id,
+            **self.test_consumer
+        )
+
+    def test_list_secret_consumers(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.secret_consumer_client.list_consumers_in_secret,
+            self.secret_id)
+
+    def test_create_secret_consumer(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.secret_consumer_client.add_consumer_to_secret,
+            self.secret_id,
+            **self.test_consumer)
+
+    def test_delete_secret_consumer(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.secret_consumer_client.delete_consumer_from_secret,
+            self.secret_id,
+            **self.test_consumer)
+
+
 class ProjectMemberTests(ProjectReaderTests):
 
     @classmethod
@@ -518,11 +598,62 @@ class ProjectMemberTests(ProjectReaderTests):
         self.assertNotIn('users', acl['read'].keys())
 
 
+class ProjectMemberV1_1Tests(ProjectReaderV1_1Tests):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.secret_consumer_client = cls.member_secret_consumer_client
+
+    def test_list_secret_consumers(self):
+        resp = self.secret_consumer_client.list_consumers_in_secret(
+            self.secret_id
+        )
+        self.assertEqual(1, resp['total'])
+
+    def test_create_secret_consumer(self):
+        second_consumer = {
+            'service': 'service2',
+            'resource_id': 'resource_id2',
+            'resource_type': 'resource_type2'
+        }
+
+        resp = self.secret_consumer_client.add_consumer_to_secret(
+            self.secret_id,
+            **second_consumer)
+
+        self.assertEqual(2, len(resp['consumers']))
+
+    def test_delete_secret_consumer(self):
+        resp = self.secret_consumer_client.delete_consumer_from_secret(
+            self.secret_id,
+            **self.test_consumer)
+
+        self.assertEqual(0, len(resp['consumers']))
+
+
 class ProjectAdminTests(ProjectMemberTests):
     @classmethod
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.admin_secret_client
+
+
+class ProjectAdminV1_1Tests(ProjectMemberV1_1Tests):
+
+    @classmethod
+    def setup_clients(cls):
+        super().setup_clients()
+        cls.secret_consumer_client = cls.admin_secret_consumer_client
+
+    def test_create_secret_consumer(self):
+        pass
+
+    def test_delete_secret_consumer(self):
+        pass
+
+    def test_list_secret_consumers(self):
+        pass
 
 
 class SystemReaderTests(rbac_base.BarbicanV1RbacBase, BarbicanV1RbacSecrets):

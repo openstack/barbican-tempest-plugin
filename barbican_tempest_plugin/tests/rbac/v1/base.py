@@ -22,8 +22,10 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from tempest import clients
 from tempest import config
 from tempest.lib import auth
+from tempest.lib.common import api_version_utils
 from tempest.lib.common.utils import data_utils
 from tempest import test
+
 
 CONF = config.CONF
 
@@ -40,7 +42,8 @@ def create_aes_key():
     return base64.b64encode(kdf.derive(password))
 
 
-class BarbicanV1RbacBase(test.BaseTestCase):
+class BarbicanV1RbacBase(test.BaseTestCase,
+                         api_version_utils.BaseMicroversionTest):
 
     identity_version = 'v3'
     _created_projects = None
@@ -63,6 +66,11 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         if not CONF.barbican_rbac_scope_verification.enforce_scope:
             raise cls.skipException("enforce_scope is not enabled for "
                                     "barbican, skipping RBAC tests")
+        api_version_utils.check_skip_with_microversion(
+            cls.min_microversion,
+            cls.max_microversion,
+            CONF.key_manager.min_microversion,
+            CONF.key_manager.max_microversion)
 
     @classmethod
     def setup_credentials(cls):
@@ -131,6 +139,8 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.admin_secret_client = adm.secret_v1.SecretClient()
         cls.admin_secret_metadata_client = adm.secret_v1.SecretMetadataClient()
         cls.admin_consumer_client = adm.secret_v1.ConsumerClient()
+        cls.admin_secret_consumer_client = \
+            adm.secret_v1_1.SecretConsumerClient()
         cls.admin_container_client = adm.secret_v1.ContainerClient()
         cls.admin_order_client = adm.secret_v1.OrderClient(
             secret_client=cls.admin_secret_client,
@@ -143,6 +153,8 @@ class BarbicanV1RbacBase(test.BaseTestCase):
         cls.secret_client = member.secret_v1.SecretClient()
         cls.secret_metadata_client = member.secret_v1.SecretMetadataClient()
         cls.member_consumer_client = member.secret_v1.ConsumerClient()
+        cls.member_secret_consumer_client = \
+            member.secret_v1_1.SecretConsumerClient()
         cls.container_client = member.secret_v1.ContainerClient()
         cls.order_client = member.secret_v1.OrderClient(
             secret_client=cls.secret_client,
