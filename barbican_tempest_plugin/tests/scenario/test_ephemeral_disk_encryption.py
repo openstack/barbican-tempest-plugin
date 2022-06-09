@@ -63,7 +63,7 @@ class EphemeralStorageEncryptionTest(barbican_manager.BarbicanScenarioTest):
         client_test_path = '/tmp/ephemeral_disk_encryption_test'
         img_uuid = self.sign_and_upload_image()
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
         instance = self.create_server(
             name='signed_img_server',
             image_id=img_uuid,

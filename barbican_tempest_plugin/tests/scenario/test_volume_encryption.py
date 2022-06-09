@@ -97,7 +97,7 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         img_uuid = self.sign_and_upload_image()
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
         server = self.create_server(
             name='signed_img_server',
             image_id=img_uuid,
@@ -122,7 +122,7 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
         img_uuid = self.sign_and_upload_image()
         LOG.info("Creating keypair and security group")
         keypair = self.create_keypair()
-        security_group = self._create_security_group()
+        security_group = self.create_security_group()
         server = self.create_server(
             name='signed_img_server',
             image_id=img_uuid,
