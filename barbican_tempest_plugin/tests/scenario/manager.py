@@ -126,26 +126,6 @@ class ScenarioTest(manager.NetworkScenarioTest):
 
         return image['id']
 
-    def nova_volume_attach(self, server, volume_to_attach):
-        volume = self.servers_client.attach_volume(
-            server['id'], volumeId=volume_to_attach['id'], device='/dev/%s'
-            % CONF.compute.volume_device_name)['volumeAttachment']
-        self.assertEqual(volume_to_attach['id'], volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'in-use')
-
-        self.addCleanup(self.nova_volume_detach, server, volume)
-        # Return the updated volume after the attachment
-        return self.volumes_client.show_volume(volume['id'])['volume']
-
-    def nova_volume_detach(self, server, volume):
-        self.servers_client.detach_volume(server['id'], volume['id'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
-        self.assertEqual('available', volume['status'])
-
     def _default_security_group(self, client=None, tenant_id=None):
         """Get default secgroup for given tenant_id.
 
