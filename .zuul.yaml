@@ -1,4 +1,5 @@
 - project:
+    queue: barbican
     templates:
       - tempest-plugin-jobs
       - check-requirements
@@ -13,7 +14,6 @@
         - barbican-tempest-plugin-simple-crypto-castellan-src
         - barbican-tempest-plugin-simple-crypto-cursive
     gate:
-      queue: barbican
       jobs:
         - barbican-tempest-plugin-simple-crypto
 
