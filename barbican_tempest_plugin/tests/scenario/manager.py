@@ -270,7 +270,7 @@ class ScenarioTest(manager.NetworkScenarioTest):
             available_stores = []
             try:
                 available_stores = self.image_client.info_stores()['stores']
-            except exceptions.NotFound:
+            except lib_exc.NotFound:
                 pass
             available_import_methods = self.image_client.info_import()[
                 'import-methods']['value']
