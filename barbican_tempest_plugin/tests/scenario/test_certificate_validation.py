@@ -173,5 +173,5 @@ class CertificateValidationTest(barbican_manager.BarbicanScenarioTest):
         }
         self.rebuild_server(instance['id'],
                             img_uuid_rebuild,
-                            rebuild_kwargs=rebuild_kwargs)
+                            **rebuild_kwargs)
         self.servers_client.delete_server(instance['id'])
