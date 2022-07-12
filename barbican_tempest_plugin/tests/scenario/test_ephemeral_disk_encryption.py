@@ -73,7 +73,8 @@ class EphemeralStorageEncryptionTest(barbican_manager.BarbicanScenarioTest):
         instance_ip = self.get_server_ip(instance)
         ssh_client = self.get_remote_client(
             instance_ip,
-            private_key=keypair['private_key'])
+            private_key=keypair['private_key'],
+            server=instance)
         ssh_client.exec_command('echo "%s" > %s' % (test_string,
                                                     client_test_path))
         test_output = ssh_client.exec_command('cat %s' % client_test_path)

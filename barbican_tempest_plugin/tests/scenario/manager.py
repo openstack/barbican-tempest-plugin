@@ -17,7 +17,6 @@
 from oslo_log import log
 
 from tempest.common import image as common_image
-from tempest.common.utils.linux import remote_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -225,9 +224,10 @@ class ScenarioTest(manager.NetworkScenarioTest):
         self.assertEqual('available', volume['status'])
 
     def create_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                         private_key=None):
+                         private_key=None, server=None):
         ssh_client = self.get_remote_client(ip_address,
-                                            private_key=private_key)
+                                            private_key=private_key,
+                                            server=server)
         if dev_name is not None:
             ssh_client.make_fs(dev_name)
             ssh_client.exec_command('sudo mount /dev/%s %s' % (dev_name,
@@ -241,9 +241,10 @@ class ScenarioTest(manager.NetworkScenarioTest):
         return timestamp
 
     def get_timestamp(self, ip_address, dev_name=None, mount_path='/mnt',
-                      private_key=None):
+                      private_key=None, server=None):
         ssh_client = self.get_remote_client(ip_address,
-                                            private_key=private_key)
+                                            private_key=private_key,
+                                            server=server)
         if dev_name is not None:
             ssh_client.mount(dev_name, mount_path)
         timestamp = ssh_client.exec_command('sudo cat %s/timestamp'
@@ -283,45 +284,6 @@ class ScenarioTest(manager.NetworkScenarioTest):
             raise exceptions.ServerUnreachable(server_id=server['id'])
         else:
             raise lib_exc.InvalidConfiguration()
-
-    def get_remote_client(self, ip_address, username=None, private_key=None):
-        """Get a SSH client to a remote server
-
-        @param ip_address the server floating or fixed IP address to use
-                          for ssh validation
-        @param username name of the Linux account on the remote server
-        @param private_key the SSH private key to use
-        @return a RemoteClient object
-        """
-
-        if username is None:
-            username = CONF.validation.image_ssh_user
-        # Set this with 'keypair' or others to log in with keypair or
-        # username/password.
-        if CONF.validation.auth_method == 'keypair':
-            password = None
-            if private_key is None:
-                private_key = self.keypair['private_key']
-        else:
-            password = CONF.validation.image_ssh_password
-            private_key = None
-        linux_client = remote_client.RemoteClient(ip_address, username,
-                                                  pkey=private_key,
-                                                  password=password)
-        try:
-            linux_client.validate_authentication()
-        except Exception as e:
-            message = ('Initializing SSH connection to %(ip)s failed. '
-                       'Error: %(error)s' % {'ip': ip_address,
-                                             'error': e})
-            caller = test_utils.find_test_caller()
-            if caller:
-                message = '(%s) %s' % (caller, message)
-            LOG.exception(message)
-            self._log_console_output()
-            raise
-
-        return linux_client
 
     def _default_security_group(self, client=None, tenant_id=None):
         """Get default secgroup for given tenant_id.
