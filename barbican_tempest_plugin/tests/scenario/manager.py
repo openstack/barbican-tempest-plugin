@@ -81,64 +81,6 @@ class ScenarioTest(manager.NetworkScenarioTest):
     # The create_[resource] functions only return body and discard the
     # resp part which is not used in scenario tests
 
-    def create_volume(self, size=None, name=None, snapshot_id=None,
-                      imageRef=None, volume_type=None):
-        if size is None:
-            size = CONF.volume.volume_size
-        if imageRef:
-            image = self.compute_images_client.show_image(imageRef)['image']
-            min_disk = image.get('minDisk')
-            size = max(size, min_disk)
-        if name is None:
-            name = data_utils.rand_name(self.__class__.__name__ + "-volume")
-        kwargs = {'display_name': name,
-                  'snapshot_id': snapshot_id,
-                  'imageRef': imageRef,
-                  'volume_type': volume_type,
-                  'size': size}
-        if CONF.compute.compute_volume_common_az:
-            kwargs.setdefault('availability_zone',
-                              CONF.compute.compute_volume_common_az)
-        volume = self.volumes_client.create_volume(**kwargs)['volume']
-
-        self.addCleanup(self.volumes_client.wait_for_resource_deletion,
-                        volume['id'])
-        self.addCleanup(test_utils.call_and_ignore_notfound_exc,
-                        self.volumes_client.delete_volume, volume['id'])
-
-        # NOTE(e0ne): Cinder API v2 uses name instead of display_name
-        if 'display_name' in volume:
-            self.assertEqual(name, volume['display_name'])
-        else:
-            self.assertEqual(name, volume['name'])
-        waiters.wait_for_volume_resource_status(self.volumes_client,
-                                                volume['id'], 'available')
-        # The volume retrieved on creation has a non-up-to-date status.
-        # Retrieval after it becomes active ensures correct details.
-        volume = self.volumes_client.show_volume(volume['id'])['volume']
-        return volume
-
-    def create_volume_type(self, client=None, name=None, backend_name=None):
-        if not client:
-            client = self.admin_volume_types_client
-        if not name:
-            class_name = self.__class__.__name__
-            name = data_utils.rand_name(class_name + '-volume-type')
-        randomized_name = data_utils.rand_name('scenario-type-' + name)
-
-        LOG.debug("Creating a volume type: %s on backend %s",
-                  randomized_name, backend_name)
-        extra_specs = {}
-        if backend_name:
-            extra_specs = {"volume_backend_name": backend_name}
-
-        body = client.create_volume_type(name=randomized_name,
-                                         extra_specs=extra_specs)
-        volume_type = body['volume_type']
-        self.assertIn('id', volume_type)
-        self.addCleanup(client.delete_volume_type, volume_type['id'])
-        return volume_type
-
     def _image_create(self, name, fmt, path,
                       disk_format=None, properties=None):
         if properties is None:
