@@ -68,6 +68,8 @@
               enforce_scope: True
         test-config:
           $TEMPEST_CONFIG:
+            auth:
+              tempest_roles: member
             barbican_rbac_scope_verification:
               enforce_scope: True
 
