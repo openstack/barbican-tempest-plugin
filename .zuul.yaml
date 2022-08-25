@@ -57,23 +57,6 @@
         - barbican-tempest-plugin
 
 - job:
-    name: barbican-tempest-plugin-simple-crypto-secure-rbac
-    parent: barbican-tempest-plugin-simple-crypto
-    vars:
-      devstack_local_conf:
-        post-config:
-          $BARBICAN_CONF:
-            oslo_policy:
-              enforce_new_defaults: True
-              enforce_scope: True
-        test-config:
-          $TEMPEST_CONFIG:
-            auth:
-              tempest_roles: member
-            barbican_rbac_scope_verification:
-              enforce_scope: True
-
-- job:
     name: barbican-tempest-plugin-simple-crypto-yoga
     parent: barbican-tempest-plugin-simple-crypto
     override-checkout: stable/yoga
@@ -98,10 +81,64 @@
     vars: *microversion_v1_0
 
 - job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac
+    parent: barbican-tempest-plugin-simple-crypto
+    vars:
+      devstack_local_conf:
+        post-config:
+          $BARBICAN_CONF:
+            oslo_policy:
+              enforce_new_defaults: True
+              enforce_scope: True
+        test-config:
+          $TEMPEST_CONFIG:
+            auth:
+              tempest_roles: member
+            barbican_rbac_scope_verification:
+              enforce_scope: True
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac-yoga
+    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
+    override-checkout: stable/yoga
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac-xena
+    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
+    override-checkout: stable/xena
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac-wallaby
+    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
+    override-checkout: stable/wallaby
+    vars: *microversion_v1_0
+
+- job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only
     parent: devstack-tempest-ipv6
     required-projects: *barbican-tempest-reqs
     vars: *barbican-tempest-vars
+
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-yoga
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    override-checkout: stable/yoga
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-xena
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    override-checkout: stable/xena
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-wallaby
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    override-checkout: stable/wallaby
+    vars: *microversion_v1_0
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-castellan-src
