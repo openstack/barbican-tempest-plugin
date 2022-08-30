@@ -569,9 +569,16 @@ class ProjectMemberTests(ProjectReaderTests):
         self.assertIn("read", acl.keys())
 
     def test_put_secret_acl(self):
+        self.assertRaises(
+            exceptions.Forbidden,
+            self.other_secret_client.get_secret_metadata,
+            self.secret_id
+        )
         _ = self.client.put_secret_acl(self.secret_id, self.valid_acl)
         acl = self.client.get_secret_acl(self.secret_id)
         self.assertIn(self.other_secret_client.user_id, acl['read']['users'])
+        resp = self.other_secret_client.get_secret_metadata(self.secret_id)
+        self.assertIn(self.secret_id, resp['secret_ref'])
 
     def test_patch_secret_acl(self):
         _ = self.client.put_secret_acl(self.secret_id, self.valid_acl)
