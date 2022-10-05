@@ -81,6 +81,24 @@
     vars: *microversion_v1_0
 
 - job:
+    name: barbican-tempest-plugin-simple-crypto-victoria
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/victoria
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ussuri
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/ussuri
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-train
+    parent: barbican-tempest-plugin-simple-crypto
+    override-checkout: stable/train
+    vars: *microversion_v1_0
+
+- job:
     name: barbican-tempest-plugin-simple-crypto-secure-rbac
     parent: barbican-tempest-plugin-simple-crypto
     vars:
@@ -138,6 +156,24 @@
     name: barbican-tempest-plugin-simple-crypto-ipv6-only-wallaby
     parent: barbican-tempest-plugin-simple-crypto-ipv6-only
     override-checkout: stable/wallaby
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-victoria
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    override-checkout: stable/victoria
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-ussuri
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    override-checkout: stable/ussuri
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-train
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    override-checkout: stable/train
     vars: *microversion_v1_0
 
 - job:
