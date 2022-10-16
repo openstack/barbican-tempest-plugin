@@ -7,6 +7,7 @@
       jobs:
         - barbican-tempest-plugin-simple-crypto
         - barbican-tempest-plugin-simple-crypto-secure-rbac
+        - barbican-tempest-plugin-simple-crypto-zed
         - barbican-tempest-plugin-simple-crypto-yoga
         - barbican-tempest-plugin-simple-crypto-xena
         - barbican-tempest-plugin-simple-crypto-wallaby
@@ -55,6 +56,19 @@
       tempest_test_regex: barbican
       tempest_plugins:
         - barbican-tempest-plugin
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-zed
+    parent: barbican-tempest-plugin-simple-crypto
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/zed
+    vars:
+      devstack_local_conf:
+        test-config:
+          $TEMPEST_CONFIG:
+            key_manager:
+              min_microversion: '1.0'
+              max_microversion: '1.1'
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-yoga
