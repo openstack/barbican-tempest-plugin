@@ -15,6 +15,7 @@
 import testtools
 
 from oslo_log import log as logging
+
 from tempest.common import utils
 from tempest import config
 from tempest.lib.common import api_version_utils
@@ -118,6 +119,8 @@ class VolumeEncryptionTest(barbican_manager.BarbicanScenarioTest):
                       'PLAIN encryptor provider is not supported on rbd')
     @decorators.idempotent_id('cbc752ed-b716-4727-910f-956ccf965723')
     @utils.services('compute', 'volume', 'image')
+    @testtools.skipIf(CONF.volume.storage_protocol == 'ceph',
+                      'Skip because ceph does not support Provider plain')
     def test_encrypted_cinder_volumes_cryptsetup(self):
         img_uuid = self.sign_and_upload_image()
         LOG.info("Creating keypair and security group")
