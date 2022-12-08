@@ -15,6 +15,7 @@
 
 
 import json
+import urllib.parse
 
 from tempest import config
 from tempest.lib.common.utils import data_utils
@@ -73,12 +74,21 @@ class SecretClient(base.BarbicanTempestClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
-    def get_secret_payload(self, secret_id):
+    def get_secret_payload(self, secret_id, **kwargs):
+        """GET /v1/secrets/{secret_id}/payload
+
+        Retrieve the payload.If kwargs are provided they are added
+        to the request as query string parameters.
+        """
         content_headers = {
             "Accept": "application/octet-stream"
         }
-        resp, body = self.get("v1/secrets/%s/payload" % secret_id,
-                              headers=content_headers)
+        uri = "v1/secrets/{}/payload".format(secret_id)
+        if kwargs:
+            uri += '?'
+            uri += urllib.parse.urlencode(kwargs)
+
+        resp, body = self.get(uri, headers=content_headers)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
