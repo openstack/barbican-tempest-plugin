@@ -125,14 +125,14 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
         self.assertRaises(exceptions.Forbidden, self.client.list_quotas)
 
     def test_get_custom_quota_for_project(self):
-        project_id = self.client.tenant_id
+        project_id = self.client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.get_project_quota,
             project_id)
 
     def test_set_new_quota_for_project(self):
-        project_id = self.client.tenant_id
+        project_id = self.client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.create_project_quota,
@@ -145,21 +145,21 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
         )
 
     def test_remove_custom_quota_for_project(self):
-        project_id = self.client.tenant_id
+        project_id = self.client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.delete_project_quota,
             project_id)
 
     def test_get_custom_quota_for_other_project(self):
-        project_id = self.other_secret_client.tenant_id
+        project_id = self.other_secret_client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.get_project_quota,
             project_id)
 
     def test_set_new_quota_for_other_project(self):
-        project_id = self.other_secret_client.tenant_id
+        project_id = self.other_secret_client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.create_project_quota,
@@ -172,7 +172,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
         )
 
     def test_remove_custom_quota_for_other_project(self):
-        project_id = self.other_secret_client.tenant_id
+        project_id = self.other_secret_client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.delete_project_quota,
