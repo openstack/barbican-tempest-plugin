@@ -11,6 +11,7 @@
 # WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 # License for the specific language governing permissions and limitations
 # under the License.
+import testtools
 
 from oslo_log import log as logging
 from tempest.common import utils
@@ -79,6 +80,9 @@ class CertificateValidationTest(barbican_manager.BarbicanScenarioTest):
 
     @decorators.idempotent_id('6d354881-35a6-4568-94b8-2204bbf67b29')
     @utils.services('compute', 'image')
+    @testtools.skipUnless(
+        CONF.image_signature_verification.certificate_validation,
+        "Image signature certificate validation is not enforced")
     def test_signed_image_invalid_cert_boot_failure(self):
         """Test that Nova refuses to boot an unvalidated signed image.
 

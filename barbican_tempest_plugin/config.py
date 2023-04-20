@@ -90,6 +90,10 @@ ImageSignatureVerificationGroup = [
                 default=True,
                 help="Does the test environment enforce glance image "
                      "verification?"),
+    cfg.BoolOpt('certificate_validation',
+                default=True,
+                help="Does the test environment enforce image signature"
+                     "certificate validation?")
 ]
 
 barbican_rbac_scope_verification_group = cfg.OptGroup(
