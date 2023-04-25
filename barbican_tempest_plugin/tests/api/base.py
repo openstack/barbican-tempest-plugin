@@ -81,22 +81,16 @@ class BaseKeyManagerTest(test.BaseTestCase,
     def setup_clients(cls):
         super(BaseKeyManagerTest, cls).setup_clients()
         os = getattr(cls, 'os_%s' % cls.credentials[0])
-        cls.consumer_client = os.secret_v1.ConsumerClient(
-            service='key-manager'
-        )
-        cls.container_client = os.secret_v1.ContainerClient(
-            service='key-manager'
-        )
-        cls.order_client = os.secret_v1.OrderClient(service='key-manager')
-        cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
+        cls.consumer_client = os.secret_v1.ConsumerClient()
+        cls.container_client = os.secret_v1.ContainerClient()
+        cls.order_client = os.secret_v1.OrderClient()
+        cls.secret_client = os.secret_v1.SecretClient()
         cls.secret_consumer_client = os.secret_v1_1.SecretConsumerClient()
-        cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
-            service='key-manager'
-        )
+        cls.secret_metadata_client = os.secret_v1.SecretMetadataClient()
         cls.version_client = os.secret_v1_1.VersionClient()
 
         os = getattr(cls, 'os_roles_%s' % cls.credentials[1][0])
-        cls.quota_client = os.secret_v1.QuotaClient(service='key-manager')
+        cls.quota_client = os.secret_v1.QuotaClient()
 
     @classmethod
     def setup_credentials(cls):

@@ -43,7 +43,12 @@ KeyManagerOpts = [
                     "min_microversion and max_microversion. "
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
-                    "with format 'X.Y' or string 'latest'")
+                    "with format 'X.Y' or string 'latest'"),
+    cfg.StrOpt('region',
+               default='regionOne',
+               help="The barbican region name to use. If no such region is"
+                    "found in the service catalog, the first found one is "
+                    "used.")
 ]
 
 barbican_tempest_group = cfg.OptGroup(
