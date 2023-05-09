@@ -22,4 +22,4 @@ https://docs.openstack.org/tempest/latest/#using-plugins
 
 Bugs
 ----
-Please report bugs to: https://storyboard.openstack.org/#!/project/openstack/barbican-tempest-plugin
+Please report bugs to: http://bugs.launchpad.net/barbican
