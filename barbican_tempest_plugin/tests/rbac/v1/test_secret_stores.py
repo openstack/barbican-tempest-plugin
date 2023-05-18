@@ -97,6 +97,7 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
         We need to set up the devstack plugin to use multiple backends
         so we can run these tests.
         """
+        super().skip_checks()
         if not CONF.barbican_tempest.enable_multiple_secret_stores:
             raise cls.skipException("enable_multiple_secret_stores is not "
                                     "configured.  Skipping RBAC tests.")
@@ -125,6 +126,18 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
         self.assertTrue(resp['global_default'])
 
     def test_get_preferred_secret_store(self):
+        # First use project admin to set preferred secret store
+        resp = self.do_request('list_secret_stores')
+        secret_store_id = self.ref_to_uuid(
+            resp['secret_stores'][0]['secret_store_ref']
+        )
+        admin_client = self.os_project_admin.secret_v1.SecretStoresClient()
+        self.do_request('set_preferred_secret_store',
+                        client=admin_client,
+                        secret_store_id=secret_store_id)
+
+        # Check that other users in project can view the newly set
+        # preferred secret store
         resp = self.do_request('get_preferred_secret_store')
         self.assertEqual('ACTIVE', resp['status'])
 
@@ -142,7 +155,7 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
         secret_store_id = self.ref_to_uuid(
             resp['secret_stores'][0]['secret_store_ref']
         )
-        self.do_request('unset_peferred_secret_store',
+        self.do_request('unset_preferred_secret_store',
                         expected_status=exceptions.Forbidden,
                         secret_store_id=secret_store_id)
 
@@ -172,11 +185,10 @@ class ProjectAdminTests(ProjectMemberTests):
         )
         self.do_request('set_preferred_secret_store',
                         secret_store_id=secret_store_id)
-        self.do_request('unset_peferred_secret_store',
+        self.do_request('unset_preferred_secret_store',
                         secret_store_id=secret_store_id)
-        resp = self.do_request('get_preferred_secret_store')
-        self.assertEqual(secret_store_id,
-                         self.ref_to_uuid(resp['secret_store_ref']))
+        self.do_request('get_preferred_secret_store',
+                        expected_status=exceptions.NotFound)
 
 
 class ProjectReaderTests(ProjectMemberTests):
