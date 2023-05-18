@@ -49,12 +49,10 @@ class SecretStoresClient(base.BarbicanTempestClient):
 
     def set_preferred_secret_store(self, secret_store_id):
         uri = '/v1/secret-stores/{}/preferred'.format(secret_store_id)
-        resp, body = self.post(uri)
-        self.expected_success(200, resp.status)
-        return json.loads(body.decode('UTF-8'))
+        resp, body = self.post(uri, None)
+        self.expected_success(204, resp.status)
 
     def unset_preferred_secret_store(self, secret_store_id):
         uri = '/v1/secret-stores/{}/preferred'.format(secret_store_id)
         resp, body = self.delete(uri)
-        self.expected_success(200, resp.status)
-        return json.loads(body.decode('UTF-8'))
+        self.expected_success(204, resp.status)
