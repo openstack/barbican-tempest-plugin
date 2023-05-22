@@ -92,11 +92,6 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
 
     @classmethod
     def skip_checks(cls):
-        """TODO(redrobot): Run this with multiple backends
-
-        We need to set up the devstack plugin to use multiple backends
-        so we can run these tests.
-        """
         super().skip_checks()
         if not CONF.barbican_tempest.enable_multiple_secret_stores:
             raise cls.skipException("enable_multiple_secret_stores is not "
