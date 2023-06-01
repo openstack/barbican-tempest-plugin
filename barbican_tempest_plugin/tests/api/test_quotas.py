@@ -16,6 +16,7 @@ from barbican_tempest_plugin.tests.api import base
 
 from tempest import config
 from tempest.lib import decorators
+from tempest.lib import exceptions
 
 CONF = config.CONF
 
@@ -25,14 +26,22 @@ class QuotasTest(base.BaseKeyManagerTest):
 
     @decorators.idempotent_id('47ebc42b-0e53-4060-b1a1-55bee2c7c43f')
     def test_get_effective_quota(self):
-        # Verify the default quota settings
-        body = self.quota_client.get_default_project_quota()
-        quotas = body.get('quotas')
-        self.assertEqual(-1, quotas.get('secrets'))
-        self.assertEqual(-1, quotas.get('cas'))
-        self.assertEqual(-1, quotas.get('orders'))
-        self.assertEqual(-1, quotas.get('containers'))
-        self.assertEqual(-1, quotas.get('consumers'))
+        if CONF.barbican_rbac_scope_verification.enforce_scope:
+            # This test is using key-manager:service-admin legacy
+            # role. User with only this role should get a Forbidden
+            # error when trying to get effective quotas in SRBAC
+            # environment.
+            self.assertRaises(
+                exceptions.Forbidden,
+                self.quota_client.get_default_project_quota)
+        else:
+            body = self.quota_client.get_default_project_quota()
+            quotas = body.get('quotas')
+            self.assertEqual(-1, quotas.get('secrets'))
+            self.assertEqual(-1, quotas.get('cas'))
+            self.assertEqual(-1, quotas.get('orders'))
+            self.assertEqual(-1, quotas.get('containers'))
+            self.assertEqual(-1, quotas.get('consumers'))
 
 
 class ProjectQuotasTest(base.BaseKeyManagerTest):
