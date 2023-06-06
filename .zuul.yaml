@@ -137,8 +137,6 @@
               global_default: true
         test-config:
           $TEMPEST_CONFIG:
-            auth:
-              tempest_roles: member
             barbican_rbac_scope_verification:
               enforce_scope: True
             barbican_tempest:
