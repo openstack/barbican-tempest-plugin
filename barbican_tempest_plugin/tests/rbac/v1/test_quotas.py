@@ -193,3 +193,89 @@ class ProjectAdminTests(ProjectMemberTests):
     def setup_clients(cls):
         super().setup_clients()
         cls.client = cls.os_project_admin.secret_v1.QuotaClient()
+
+    def test_list_project_quotas(self):
+        quotas = self.client.list_quotas()
+        self.assertIn("project_quotas", quotas)
+
+    def test_get_custom_quota_for_project(self):
+        project_id = self.client.tenant_id
+        self.client.create_project_quota(
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            })
+        quota = self.client.get_project_quota(project_id)
+        self.assertIn("project_quotas", quota)
+
+    def test_set_new_quota_for_project(self):
+        project_id = self.client.tenant_id
+        self.client.create_project_quota(
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            })
+        quota = self.client.get_project_quota(project_id)
+        self.assertIn("project_quotas", quota)
+
+    def test_remove_custom_quota_for_project(self):
+        project_id = self.client.tenant_id
+        self.client.create_project_quota(
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            })
+        quota = self.client.get_project_quota(project_id)
+        self.assertIn("project_quotas", quota)
+        self.client.delete_project_quota(project_id)
+        self.assertRaises(
+            exceptions.NotFound,
+            self.client.get_project_quota,
+            project_id)
+
+    def test_get_custom_quota_for_other_project(self):
+        project_id = self.other_secret_client.tenant_id
+        self.client.create_project_quota(
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            })
+        quota = self.client.get_project_quota(project_id)
+        self.assertIn("project_quotas", quota)
+
+    def test_set_new_quota_for_other_project(self):
+        project_id = self.other_secret_client.tenant_id
+        self.client.create_project_quota(
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            })
+        quota = self.client.get_project_quota(project_id)
+        self.assertIn("project_quotas", quota)
+
+    def test_remove_custom_quota_for_other_project(self):
+        project_id = self.other_secret_client.tenant_id
+        self.client.create_project_quota(
+            project_id,
+            project_quotas={
+                "secrets": 1000,
+                "orders": 1000,
+                "containers": 1000
+            })
+        quota = self.client.get_project_quota(project_id)
+        self.assertIn("project_quotas", quota)
+        self.client.delete_project_quota(project_id)
+        self.assertRaises(
+            exceptions.NotFound,
+            self.client.get_project_quota,
+            project_id)

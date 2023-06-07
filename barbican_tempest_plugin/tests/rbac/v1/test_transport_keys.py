@@ -112,6 +112,13 @@ class ProjectAdminTests(ProjectMemberTests):
         super().setup_clients()
         cls.client = cls.os_project_admin.secret_v1.TransportKeyClient()
 
+    def test_create_transport_key(self):
+        transport_key = self.client.create_transport_key(
+            plugin_name="simple-crypto",
+            transport_key="UUUU-UUUU-IIII-DDDD"
+        )
+        self.assertIn("transport_key_ref", transport_key)
+
 
 class ProjectReaderTests(ProjectMemberTests):
 
