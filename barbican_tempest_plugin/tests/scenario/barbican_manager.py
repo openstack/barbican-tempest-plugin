@@ -30,6 +30,7 @@ from cryptography.x509.oid import NameOID
 from oslo_log import log as logging
 from tempest.api.compute import api_microversion_fixture
 from tempest import config
+from tempest.lib import exceptions as lib_exc
 
 from barbican_tempest_plugin.tests.scenario import manager as mgr
 
@@ -55,18 +56,13 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
             self.request_microversion))
         self.img_file = CONF.scenario.img_file
         if not os.path.exists(self.img_file):
-            # TODO(kopecmartin): replace LOG.warning for rasing
-            # InvalidConfiguration exception after tempest 25.0.0 is
-            # released - there will be one release which accepts both
-            # behaviors in order to avoid many failures across CIs and etc.
-            LOG.warning(
+            lib_exc.InvalidConfiguration(
                 'Starting Tempest 25.0.0 release, CONF.scenario.img_file need '
                 'a full path for the image. CONF.scenario.img_dir was '
                 'deprecated and will be removed in the next release. Till '
-                'Tempest 25.0.0, old behavior is maintained and keep working '
+                'Tempest 25.0.0, old behavior was maintained and kept working '
                 'but starting Tempest 26.0.0, you need to specify the full '
                 'path in CONF.scenario.img_file config option.')
-            self.img_file = os.path.join(CONF.scenario.img_dir, self.img_file)
 
         self.private_key = rsa.generate_private_key(public_exponent=65537,
                                                     key_size=3072,
