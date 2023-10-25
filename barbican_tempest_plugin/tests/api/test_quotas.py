@@ -56,6 +56,7 @@ class ProjectQuotasTest(base.BaseKeyManagerTest):
             raise cls.skipException("enforce_scope is enabled for barbican, "
                                     "skipping project quota tests.")
 
+    @decorators.idempotent_id('07dec492-7f19-4d94-a9d7-28c0643db1bc')
     def test_manage_project_quotas(self):
         # Confirm that there are no quotas
         body = self.quota_client.list_quotas()
