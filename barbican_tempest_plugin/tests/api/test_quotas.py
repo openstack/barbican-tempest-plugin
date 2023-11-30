@@ -26,7 +26,7 @@ class QuotasTest(base.BaseKeyManagerTest):
 
     @decorators.idempotent_id('47ebc42b-0e53-4060-b1a1-55bee2c7c43f')
     def test_get_effective_quota(self):
-        if CONF.barbican_rbac_scope_verification.enforce_scope:
+        if CONF.enforce_scope.barbican:
             # This test is using key-manager:service-admin legacy
             # role. User with only this role should get a Forbidden
             # error when trying to get effective quotas in SRBAC
@@ -49,7 +49,7 @@ class ProjectQuotasTest(base.BaseKeyManagerTest):
     @classmethod
     def skip_checks(cls):
         super().skip_checks()
-        if CONF.barbican_rbac_scope_verification.enforce_scope:
+        if CONF.enforce_scope.barbican:
             # These tests can't be run with the new RBAC rules because
             # the APIs they're testing require system-scoped credentials
             # instead of the project-scoped credentials used here.

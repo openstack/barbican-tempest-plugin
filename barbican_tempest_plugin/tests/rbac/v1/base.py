@@ -63,7 +63,7 @@ class BarbicanV1RbacBase(test.BaseTestCase,
     @classmethod
     def skip_checks(cls):
         super().skip_checks()
-        if not CONF.barbican_rbac_scope_verification.enforce_scope:
+        if not CONF.enforce_scope.barbican:
             raise cls.skipException("enforce_scope is not enabled for "
                                     "barbican, skipping RBAC tests")
         api_version_utils.check_skip_with_microversion(
