@@ -645,6 +645,18 @@ class ProjectAdminTests(ProjectMemberTests):
         super().setup_clients()
         cls.client = cls.admin_secret_client
 
+    def test_delete_other_project_secret(self):
+        other_secret_id = self.create_other_project_secret(
+            'get_other_payload',
+            payload='loremipsumloremipsum')
+        self.client.delete_secret(other_secret_id)
+
+    def test_get_other_project_secret(self):
+        other_secret_id = self.create_other_project_secret(
+            'get_other_secret',
+            payload='¡Muy secreto!')
+        self.client.get_secret_metadata(other_secret_id)
+
 
 class ProjectAdminV1_1Tests(ProjectMemberV1_1Tests):
 

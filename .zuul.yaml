@@ -154,19 +154,21 @@
             oslo_policy:
               enforce_new_defaults: True
               enforce_scope: True
-            secretstore:
-              enable_multiple_secret_stores: True
-              stores_lookup_suffix: simple_crypto
-            secretstore:simple_crypto:
-              secret_store_plugin: store_crypto
-              crypto_plugin: simple_crypto
-              global_default: true
+            # (lpiwowar): Uncomment once this bug is resolved:
+            # https://bugs.launchpad.net/barbican/+bug/2043457
+            # secretstore:
+            #  enable_multiple_secret_stores: True
+            #  stores_lookup_suffix: simple_crypto
+            # secretstore:simple_crypto:
+            #  secret_store_plugin: store_crypto
+            #  crypto_plugin: simple_crypto
+            #  global_default: true
         test-config:
           $TEMPEST_CONFIG:
             barbican_rbac_scope_verification:
               enforce_scope: True
-            barbican_tempest:
-              enable_multiple_secret_stores: True
+            # barbican_tempest:
+            #  enable_multiple_secret_stores: True
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-secure-rbac-yoga
