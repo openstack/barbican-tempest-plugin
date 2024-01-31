@@ -12,6 +12,7 @@
 import abc
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 
 from barbican_tempest_plugin.tests.rbac.v1 import base
@@ -102,10 +103,12 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
         super().setup_clients()
         cls.client = cls.os_project_member.secret_v1.SecretStoresClient()
 
+    @decorators.idempotent_id('bf31560c-42e5-4afc-b1d6-a3a8aa7773d3')
     def test_list_secret_stores(self):
         resp = self.do_request('list_secret_stores')
         self.assertIn('secret_stores', resp)
 
+    @decorators.idempotent_id('28d8e43b-af38-4985-8f70-3c1098116561')
     def test_get_secret_store(self):
         resp = self.do_request('list_secret_stores')
         secret_store_id = self.ref_to_uuid(
@@ -116,10 +119,12 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
         self.assertEqual(secret_store_id,
                          self.ref_to_uuid(resp['secret_store_ref']))
 
+    @decorators.idempotent_id('e97d0cbe-112c-490e-b3d7-02981161d471')
     def test_get_global_secret_store(self):
         resp = self.do_request('get_global_secret_store')
         self.assertTrue(resp['global_default'])
 
+    @decorators.idempotent_id('c3554210-8960-4d09-a1ba-369b8df6ca1f')
     def test_get_preferred_secret_store(self):
         # First use project admin to set preferred secret store
         resp = self.do_request('list_secret_stores')
@@ -136,6 +141,7 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
         resp = self.do_request('get_preferred_secret_store')
         self.assertEqual('ACTIVE', resp['status'])
 
+    @decorators.idempotent_id('ada28e3a-ec67-4994-9dde-410463d6d06e')
     def test_set_preferred_secret_store(self):
         resp = self.do_request('list_secret_stores')
         secret_store_id = self.ref_to_uuid(
@@ -145,6 +151,7 @@ class ProjectMemberTests(base.BarbicanV1RbacBase, BarbicanV1RbacSecretStores):
                         expected_status=exceptions.Forbidden,
                         secret_store_id=secret_store_id)
 
+    @decorators.idempotent_id('c3f52fd1-5d18-498f-81b2-45df5cb09a87')
     def test_unset_preferred_secret_store(self):
         resp = self.do_request('list_secret_stores')
         secret_store_id = self.ref_to_uuid(
@@ -162,6 +169,7 @@ class ProjectAdminTests(ProjectMemberTests):
         super().setup_clients()
         cls.client = cls.os_project_admin.secret_v1.SecretStoresClient()
 
+    @decorators.idempotent_id('c459deb6-6447-43c4-820b-384903e700cb')
     def test_set_preferred_secret_store(self):
         resp = self.do_request('list_secret_stores')
         secret_store_id = self.ref_to_uuid(
@@ -173,6 +181,7 @@ class ProjectAdminTests(ProjectMemberTests):
         self.assertEqual(secret_store_id,
                          self.ref_to_uuid(resp['secret_store_ref']))
 
+    @decorators.idempotent_id('d21ca9b6-b62e-43d1-9c9f-a6e16c939c01')
     def test_unset_preferred_secret_store(self):
         resp = self.do_request('list_secret_stores')
         secret_store_id = self.ref_to_uuid(
