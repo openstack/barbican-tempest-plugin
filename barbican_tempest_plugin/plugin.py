@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+import itertools
 import os
 
 from tempest.test_discover import plugins
@@ -32,6 +32,8 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
     def register_opts(self, conf):
         conf.register_opt(project_config.service_option,
                           group='service_available')
+        conf.register_opts(
+            project_config.EnforceScopeGroup, group='enforce_scope')
 
         conf.register_group(project_config.key_manager_group)
         conf.register_opts(project_config.KeyManagerOpts,
@@ -47,15 +49,19 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
                            project_config.ephemeral_storage_encryption_group)
         conf.register_opts(project_config.ImageSignatureVerificationGroup,
                            project_config.image_signature_verification_group)
-        conf.register_group(
-            project_config.barbican_rbac_scope_verification_group)
-        conf.register_opts(
-            project_config.BarbicanRBACScopeVerificationGroup,
-            project_config.barbican_rbac_scope_verification_group
-        )
 
     def get_opt_lists(self):
-        return [('service_available', [project_config.service_option])]
+        return [
+            ('service_available', [project_config.service_option]),
+            (project_config.key_manager_group.name,
+             project_config.KeyManagerOpts),
+            (project_config.barbican_tempest_group.name,
+             project_config.barbican_tempest_group),
+            (project_config.ephemeral_storage_encryption_group.name,
+             itertools.chain(project_config.EphemeralStorageEncryptionGroup,
+                             project_config.ImageSignatureVerificationGroup)),
+            ('enforce_scope', project_config.EnforceScopeGroup)
+        ]
 
     def get_service_clients(self):
         v1_params = {

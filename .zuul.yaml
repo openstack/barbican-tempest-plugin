@@ -165,8 +165,8 @@
             #  global_default: true
         test-config:
           $TEMPEST_CONFIG:
-            barbican_rbac_scope_verification:
-              enforce_scope: True
+            enforce_scope:
+              barbican: True
             # barbican_tempest:
             #  enable_multiple_secret_stores: True
 

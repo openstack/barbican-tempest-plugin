@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    The ``[barbican_rbac_scope_verification] enforce_scope`` option has been
+    deprecated in favor of the new ``[enforce_scope] barican`` option.
