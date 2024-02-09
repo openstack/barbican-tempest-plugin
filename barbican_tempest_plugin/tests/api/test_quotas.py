@@ -65,7 +65,7 @@ class ProjectQuotasTest(base.BaseKeyManagerTest):
 
         # Create a quota set for the test project
         self.create_project_quota(
-            self.quota_client.tenant_id,
+            self.quota_client.project_id,
             project_quotas={
                 'secrets': 30,
                 'orders': 10,
@@ -79,7 +79,7 @@ class ProjectQuotasTest(base.BaseKeyManagerTest):
         self.assertEqual(1, len(body.get('project_quotas')), body)
         project_quotas = body.get('project_quotas')[0]
         self.assertEqual(
-            self.quota_client.tenant_id,
+            self.quota_client.project_id,
             project_quotas.get('project_id'),
             body
         )
@@ -90,7 +90,7 @@ class ProjectQuotasTest(base.BaseKeyManagerTest):
 
         # Verify that the quotas can be found via specific listing.
         body = self.quota_client.get_project_quota(
-            self.quota_client.tenant_id
+            self.quota_client.project_id
         )
         project_quotas = body.get('project_quotas')
         self.assertEqual(30, project_quotas.get('secrets'), body)
@@ -98,7 +98,7 @@ class ProjectQuotasTest(base.BaseKeyManagerTest):
         self.assertEqual(20, project_quotas.get('containers'), body)
 
         # Delete the project quota and confirm that it got deleted
-        self.delete_project_quota(self.quota_client.tenant_id)
+        self.delete_project_quota(self.quota_client.project_id)
 
         body = self.quota_client.list_quotas()
         self.assertEqual(0, body.get('total'), body)

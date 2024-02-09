@@ -129,7 +129,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
 
     @decorators.idempotent_id('948afb0d-35e8-4a23-880f-b2dc3eebf1bd')
     def test_get_custom_quota_for_project(self):
-        project_id = self.client.tenant_id
+        project_id = self.client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.get_project_quota,
@@ -137,7 +137,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
 
     @decorators.idempotent_id('c29af3ed-561e-48da-8a1b-81ba19c943bb')
     def test_set_new_quota_for_project(self):
-        project_id = self.client.tenant_id
+        project_id = self.client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.create_project_quota,
@@ -151,7 +151,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
 
     @decorators.idempotent_id('7382fb20-01f6-4322-9ebc-5bf6038e3e1b')
     def test_remove_custom_quota_for_project(self):
-        project_id = self.client.tenant_id
+        project_id = self.client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.delete_project_quota,
@@ -159,7 +159,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
 
     @decorators.idempotent_id('5d062790-6754-4d21-bd0c-08d4a74fa6f3')
     def test_get_custom_quota_for_other_project(self):
-        project_id = self.other_secret_client.tenant_id
+        project_id = self.other_secret_client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.get_project_quota,
@@ -167,7 +167,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
 
     @decorators.idempotent_id('26bd25ab-92c2-4437-a742-f301703ce523')
     def test_set_new_quota_for_other_project(self):
-        project_id = self.other_secret_client.tenant_id
+        project_id = self.other_secret_client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.create_project_quota,
@@ -181,7 +181,7 @@ class ProjectReaderTests(base.BarbicanV1RbacBase, BarbicanV1RbacQuota):
 
     @decorators.idempotent_id('7a763152-c64b-42d5-9669-213681327c58')
     def test_remove_custom_quota_for_other_project(self):
-        project_id = self.other_secret_client.tenant_id
+        project_id = self.other_secret_client.project_id
         self.assertRaises(
             exceptions.Forbidden,
             self.client.delete_project_quota,
