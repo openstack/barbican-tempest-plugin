@@ -23,9 +23,9 @@
     name: barbican-tempest-plugin-simple-crypto
     parent: devstack-tempest
     required-projects: &barbican-tempest-reqs
-      - opendev.org/openstack/barbican
-      - opendev.org/openstack/barbican-tempest-plugin
-      - opendev.org/openstack/python-barbicanclient
+      - openstack/barbican
+      - openstack/barbican-tempest-plugin
+      - openstack/python-barbicanclient
     vars: &barbican-tempest-vars
       devstack_plugins:
         barbican: https://opendev.org/openstack/barbican
@@ -110,7 +110,7 @@
     nodeset: openstack-single-node-focal
     override-checkout: stable/wallaby
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: wallaby-last
     vars: *microversion_v1_0
 
@@ -120,7 +120,7 @@
     nodeset: openstack-single-node-focal
     override-checkout: stable/victoria
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: victoria-last
     vars: *microversion_v1_0
 
@@ -130,7 +130,7 @@
     nodeset: openstack-single-node-bionic
     override-checkout: stable/ussuri
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: ussuri-last
     vars: *microversion_v1_0
 
@@ -140,7 +140,7 @@
     nodeset: openstack-single-node-bionic
     override-checkout: stable/train
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: train-last
     vars: *microversion_v1_0
 
@@ -171,10 +171,33 @@
             #  enable_multiple_secret_stores: True
 
 - job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac-2023-1
+    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
+    nodeset: openstack-single-node-jammy
+    override-checkout: stable/2023.1
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-secure-rbac-zed
+    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/zed
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
+    vars: *microversion_v1_0
+
+- job:
     name: barbican-tempest-plugin-simple-crypto-secure-rbac-yoga
     parent: barbican-tempest-plugin-simple-crypto-secure-rbac
     nodeset: openstack-single-node-focal
     override-checkout: stable/yoga
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
     vars: *microversion_v1_0
 
 - job:
@@ -182,6 +205,9 @@
     parent: barbican-tempest-plugin-simple-crypto-secure-rbac
     nodeset: openstack-single-node-focal
     override-checkout: stable/xena
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
     vars: *microversion_v1_0
 
 - job:
@@ -190,7 +216,7 @@
     nodeset: openstack-single-node-focal
     override-checkout: stable/wallaby
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: wallaby-last
     vars: *microversion_v1_0
 
@@ -202,10 +228,33 @@
 
 
 - job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-2023-1
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    nodeset: openstack-single-node-jammy
+    override-checkout: stable/2023.1
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
+    vars: *microversion_v1_0
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-ipv6-only-zed
+    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
+    nodeset: openstack-single-node-focal
+    override-checkout: stable/zed
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
+    vars: *microversion_v1_0
+
+- job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only-yoga
     parent: barbican-tempest-plugin-simple-crypto-ipv6-only
     nodeset: openstack-single-node-focal
     override-checkout: stable/yoga
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
     vars: *microversion_v1_0
 
 - job:
@@ -213,6 +262,9 @@
     parent: barbican-tempest-plugin-simple-crypto-ipv6-only
     nodeset: openstack-single-node-focal
     override-checkout: stable/xena
+    required-projects:
+      - name: openstack/barbican-tempest-plugin
+        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
     vars: *microversion_v1_0
 
 - job:
@@ -221,7 +273,7 @@
     nodeset: openstack-single-node-focal
     override-checkout: stable/wallaby
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: wallaby-last
     vars: *microversion_v1_0
 
@@ -231,7 +283,7 @@
     nodeset: openstack-single-node-focal
     override-checkout: stable/victoria
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: victoria-last
     vars: *microversion_v1_0
 
@@ -241,7 +293,7 @@
     nodeset: openstack-single-node-bionic
     override-checkout: stable/ussuri
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: ussuri-last
     vars: *microversion_v1_0
 
@@ -251,7 +303,7 @@
     nodeset: openstack-single-node-bionic
     override-checkout: stable/train
     required-projects:
-      - name: opendev.org/openstack/barbican-tempest-plugin
+      - name: openstack/barbican-tempest-plugin
         override-checkout: train-last
     vars: *microversion_v1_0
 
@@ -259,7 +311,7 @@
     name: barbican-tempest-plugin-simple-crypto-castellan-src
     parent: barbican-tempest-plugin-simple-crypto
     required-projects:
-      - opendev.org/openstack/castellan
+      - openstack/castellan
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-cursive
