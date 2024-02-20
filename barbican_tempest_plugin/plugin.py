@@ -57,7 +57,7 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
             (project_config.key_manager_group.name,
              project_config.KeyManagerOpts),
             (project_config.barbican_tempest_group.name,
-             project_config.barbican_tempest_group),
+             project_config.BarbicanGroupOpts),
             (project_config.ephemeral_storage_encryption_group.name,
              project_config.EphemeralStorageEncryptionGroup),
             (project_config.image_signature_verification_group.name,
