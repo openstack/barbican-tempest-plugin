@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import itertools
 import os
 
 from tempest.test_discover import plugins
@@ -47,6 +46,8 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
         conf.register_group(project_config.ephemeral_storage_encryption_group)
         conf.register_opts(project_config.EphemeralStorageEncryptionGroup,
                            project_config.ephemeral_storage_encryption_group)
+
+        conf.register_group(project_config.image_signature_verification_group)
         conf.register_opts(project_config.ImageSignatureVerificationGroup,
                            project_config.image_signature_verification_group)
 
@@ -58,8 +59,9 @@ class BarbicanTempestPlugin(plugins.TempestPlugin):
             (project_config.barbican_tempest_group.name,
              project_config.barbican_tempest_group),
             (project_config.ephemeral_storage_encryption_group.name,
-             itertools.chain(project_config.EphemeralStorageEncryptionGroup,
-                             project_config.ImageSignatureVerificationGroup)),
+             project_config.EphemeralStorageEncryptionGroup),
+            (project_config.image_signature_verification_group.name,
+             project_config.ImageSignatureVerificationGroup),
             ('enforce_scope', project_config.EnforceScopeGroup)
         ]
 
