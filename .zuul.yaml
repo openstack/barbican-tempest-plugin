@@ -60,7 +60,7 @@
     name: barbican-tempest-plugin-simple-crypto-2023-2
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-jammy
-    override-checkout: stable/2023.1
+    override-checkout: stable/2023.2
     vars:
       devstack_local_conf:
         test-config:
