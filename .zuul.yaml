@@ -42,7 +42,7 @@
         test-config:
           $TEMPEST_CONFIG:
             auth:
-              tempest_roles: creator
+              create_isolated_networks: False
             image-feature-enabled:
               # this may be removed soon, as api_v1 is false since tempest>=20
               api_v1: False
@@ -159,21 +159,20 @@
     name: barbican-tempest-plugin-simple-crypto-secure-rbac
     parent: barbican-tempest-plugin-simple-crypto
     vars:
+      devstack_localrc:
+        ENFORCE_SCOPE: True
       devstack_local_conf:
-        post-config:
-          $BARBICAN_CONF:
-            oslo_policy:
-              enforce_new_defaults: True
-              enforce_scope: True
-            # (lpiwowar): Uncomment once this bug is resolved:
-            # https://bugs.launchpad.net/barbican/+bug/2043457
-            # secretstore:
-            #  enable_multiple_secret_stores: True
-            #  stores_lookup_suffix: simple_crypto
-            # secretstore:simple_crypto:
-            #  secret_store_plugin: store_crypto
-            #  crypto_plugin: simple_crypto
-            #  global_default: true
+        # (lpiwowar): Uncomment once this bug is resolved:
+        # https://bugs.launchpad.net/barbican/+bug/2043457
+        # post-config:
+        #   $BARBICAN_CONF:
+        #     secretstore:
+        #      enable_multiple_secret_stores: True
+        #      stores_lookup_suffix: simple_crypto
+        #     secretstore:simple_crypto:
+        #      secret_store_plugin: store_crypto
+        #      crypto_plugin: simple_crypto
+        #      global_default: true
         test-config:
           $TEMPEST_CONFIG:
             enforce_scope:

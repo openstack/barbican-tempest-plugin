@@ -61,8 +61,7 @@ class BaseKeyManagerTest(test.BaseTestCase,
                          api_version_utils.BaseMicroversionTest):
     """Base class for all api tests."""
 
-    # Why do I have to be an admin to create secrets? No idea...
-    credentials = ('admin', ['service_admin', 'key-manager:service-admin'])
+    credentials = ['project_admin']
     client_manager = clients.Clients
     created_objects = {}
 
@@ -88,8 +87,6 @@ class BaseKeyManagerTest(test.BaseTestCase,
         cls.secret_consumer_client = os.secret_v1_1.SecretConsumerClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient()
         cls.version_client = os.secret_v1_1.VersionClient()
-
-        os = getattr(cls, 'os_roles_%s' % cls.credentials[1][0])
         cls.quota_client = os.secret_v1.QuotaClient()
 
     @classmethod
