@@ -7,10 +7,10 @@
       jobs:
         - barbican-tempest-plugin-simple-crypto
         - barbican-tempest-plugin-simple-crypto-secure-rbac
+        - barbican-tempest-plugin-simple-crypto-2024-2
         - barbican-tempest-plugin-simple-crypto-2024-1
         - barbican-tempest-plugin-simple-crypto-2023-2
         - barbican-tempest-plugin-simple-crypto-2023-1
-        - barbican-tempest-plugin-simple-crypto-zed
         - barbican-tempest-plugin-simple-crypto-ipv6-only
         - barbican-tempest-plugin-simple-crypto-castellan-src
         - barbican-tempest-plugin-simple-crypto-cursive
@@ -58,56 +58,38 @@
         - barbican-tempest-plugin
 
 - job:
-    name: barbican-tempest-plugin-simple-crypto-2024-1
+    name: barbican-tempest-plugin-simple-crypto-2024-2
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-jammy
-    override-checkout: stable/2024.1
-    vars:
+    override-checkout: stable/2024.2
+    vars: &microversion_v1_1
       devstack_local_conf:
         test-config:
           $TEMPEST_CONFIG:
             key_manager:
               min_microversion: '1.0'
               max_microversion: '1.1'
+
+- job:
+    name: barbican-tempest-plugin-simple-crypto-2024-1
+    parent: barbican-tempest-plugin-simple-crypto
+    nodeset: openstack-single-node-jammy
+    override-checkout: stable/2024.1
+    vars: *microversion_v1_1
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-2023-2
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2023.2
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            key_manager:
-              min_microversion: '1.0'
-              max_microversion: '1.1'
+    vars: *microversion_v1_1
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-2023-1
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2023.1
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            key_manager:
-              min_microversion: '1.0'
-              max_microversion: '1.1'
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-zed
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/zed
-    vars:
-      devstack_local_conf:
-        test-config:
-          $TEMPEST_CONFIG:
-            key_manager:
-              min_microversion: '1.0'
-              max_microversion: '1.1'
+    vars: *microversion_v1_1
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-yoga
@@ -252,26 +234,6 @@
 
 
 - job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-2023-1
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-jammy
-    override-checkout: stable/2023.1
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-zed
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/zed
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
-    vars: *microversion_v1_0
-
-- job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only-yoga
     parent: barbican-tempest-plugin-simple-crypto-ipv6-only
     nodeset: openstack-single-node-focal
@@ -309,26 +271,6 @@
     required-projects:
       - name: openstack/barbican-tempest-plugin
         override-checkout: victoria-last
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-ussuri
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/ussuri
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: ussuri-last
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-train
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/train
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: train-last
     vars: *microversion_v1_0
 
 - job:
