@@ -14,7 +14,7 @@ from tempest.lib.common import rest_client
 
 CONF = config.CONF
 
-_DEFAULT_SERVICE_TYPE = 'key-manager'
+_DEFAULT_SERVICE_TYPE = CONF.key_manager.catalog_type
 _DEFAULT_REGION = CONF.key_manager.region
 _MICROVERSION_HEADER = 'OpenStack-API-Version'
 

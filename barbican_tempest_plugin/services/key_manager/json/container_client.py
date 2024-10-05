@@ -56,7 +56,8 @@ class ContainerClient(base.BarbicanTempestClient):
     def add_secret_to_container(self, container_id, secret_id, **kwargs):
         uri = "v1/containers/%s/secrets" % container_id
         kwargs['secret_ref'] = "%s/v1/secrets/%s" % (
-            self.auth_provider.base_url({"service": "key-manager"}),
+            self.auth_provider.base_url(
+                {"service": CONF.key_manager.catalog_type}),
             secret_id
         )
 
@@ -70,7 +71,8 @@ class ContainerClient(base.BarbicanTempestClient):
     def delete_secret_from_container(self, container_id, secret_id, **kwargs):
         uri = "v1/containers/%s/secrets" % container_id
         kwargs['secret_ref'] = "%s/v1/secrets/%s" % (
-            self.auth_provider.base_url({"service": "key-manager"}),
+            self.auth_provider.base_url(
+                {"service": CONF.key_manager.catalog_type}),
             secret_id
         )
 

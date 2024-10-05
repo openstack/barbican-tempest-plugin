@@ -95,16 +95,20 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
         os = getattr(cls, 'os_%s' % cls.credentials[0])
         os_adm = getattr(cls, 'os_%s' % cls.credentials[1])
         cls.consumer_client = os.secret_v1.ConsumerClient(
-            service='key-manager'
+            service=CONF.key_manager.catalog_type
         )
         cls.container_client = os.secret_v1.ContainerClient(
-            service='key-manager'
+            service=CONF.key_manager.catalog_type,
         )
-        cls.order_client = os.secret_v1.OrderClient(service='key-manager')
-        cls.secret_client = os.secret_v1.SecretClient(service='key-manager')
+        cls.order_client = os.secret_v1.OrderClient(
+            service=CONF.key_manager.catalog_type
+        )
+        cls.secret_client = os.secret_v1.SecretClient(
+            service=CONF.key_manager.catalog_type
+        )
         cls.secret_consumer_client = os.secret_v1_1.SecretConsumerClient()
         cls.secret_metadata_client = os.secret_v1.SecretMetadataClient(
-            service='key-manager'
+            service=CONF.key_manager.catalog_type,
         )
         cls.secret_consumer_client = os.secret_v1_1.VersionClient()
 

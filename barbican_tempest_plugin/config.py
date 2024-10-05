@@ -44,6 +44,9 @@ KeyManagerOpts = [
                     "If both values are not specified, Tempest avoids tests "
                     "which require a microversion. Valid values are string "
                     "with format 'X.Y' or string 'latest'"),
+    cfg.StrOpt("catalog_type",
+               default="key-manager",
+               help="Catalog type of the key manager service."),
     cfg.StrOpt('region',
                default='regionOne',
                help="The barbican region name to use. If no such region is"
