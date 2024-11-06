@@ -10,7 +10,6 @@
         - barbican-tempest-plugin-simple-crypto-2024-2
         - barbican-tempest-plugin-simple-crypto-2024-1
         - barbican-tempest-plugin-simple-crypto-2023-2
-        - barbican-tempest-plugin-simple-crypto-2023-1
         - barbican-tempest-plugin-simple-crypto-ipv6-only
         - barbican-tempest-plugin-simple-crypto-castellan-src
         - barbican-tempest-plugin-simple-crypto-cursive
@@ -82,13 +81,6 @@
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2023.2
-    vars: *microversion_v1_1
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-2023-1
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-jammy
-    override-checkout: stable/2023.1
     vars: *microversion_v1_1
 
 - job:
@@ -175,16 +167,6 @@
               barbican: True
             # barbican_tempest:
             #  enable_multiple_secret_stores: True
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-secure-rbac-2023-1
-    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
-    nodeset: openstack-single-node-jammy
-    override-checkout: stable/2023.1
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
-    vars: *microversion_v1_0
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-secure-rbac-zed
