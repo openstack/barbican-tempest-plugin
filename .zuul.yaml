@@ -10,7 +10,6 @@
         - barbican-tempest-plugin-simple-crypto-secure-rbac
         - barbican-tempest-plugin-simple-crypto-2024-2
         - barbican-tempest-plugin-simple-crypto-2024-1
-        - barbican-tempest-plugin-simple-crypto-2023-2
         - barbican-tempest-plugin-simple-crypto-ipv6-only
         - barbican-tempest-plugin-simple-crypto-castellan-src
         - barbican-tempest-plugin-simple-crypto-cursive
@@ -84,13 +83,6 @@
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-jammy
     override-checkout: stable/2024.1
-    vars: *microversion_v1_1
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-2023-2
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-jammy
-    override-checkout: stable/2023.2
     vars: *microversion_v1_1
 
 - job:
