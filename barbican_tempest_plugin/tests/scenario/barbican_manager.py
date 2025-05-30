@@ -14,7 +14,6 @@
 #    under the License.
 
 import base64
-from datetime import datetime
 from datetime import timedelta
 import os
 
@@ -28,6 +27,7 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 
 from oslo_log import log as logging
+from oslo_utils import timeutils
 from tempest.api.compute import api_microversion_fixture
 from tempest import config
 from tempest.lib import exceptions as lib_exc
@@ -128,8 +128,8 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
             subject_name=issuer,
             public_key=private_key.public_key(),
             serial_number=x509.random_serial_number(),
-            not_valid_before=datetime.utcnow(),
-            not_valid_after=datetime.utcnow() + timedelta(days=10)
+            not_valid_before=timeutils.utcnow(),
+            not_valid_after=timeutils.utcnow() + timedelta(days=10)
         ).add_extension(
             x509.BasicConstraints(
                 ca=True,
@@ -158,7 +158,7 @@ class BarbicanScenarioTest(mgr.ScenarioTest):
     def _store_cert(self, cert):
         pem_encoding = cert.public_bytes(encoding=serialization.Encoding.PEM)
         cert_b64 = base64.b64encode(pem_encoding)
-        expire_time = (datetime.utcnow() + timedelta(days=5))
+        expire_time = (timeutils.utcnow() + timedelta(days=5))
         LOG.debug("Uploading certificate to barbican")
         result = self.secret_client.create_secret(
             expiration=expire_time.isoformat(), algorithm="rsa",

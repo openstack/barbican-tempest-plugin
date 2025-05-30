@@ -11,7 +11,6 @@
 # under the License.
 
 import base64
-from datetime import datetime
 from datetime import timedelta
 import os
 
@@ -19,6 +18,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from oslo_utils import timeutils
 from tempest import clients
 from tempest import config
 from tempest.lib import auth
@@ -249,7 +249,7 @@ class BarbicanV1RbacBase(test.BaseTestCase,
 
     def create_aes_secret_admin(self, secret_name):
         key = create_aes_key()
-        expire_time = (datetime.utcnow() + timedelta(days=5))
+        expire_time = (timeutils.utcnow() + timedelta(days=5))
         return key, self.do_request(
             'create_secret', client=self.admin_secret_client,
             expected_status=201, cleanup="secret",
