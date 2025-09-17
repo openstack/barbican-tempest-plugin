@@ -6,7 +6,6 @@
     check:
       jobs:
         - barbican-tempest-plugin-simple-crypto
-        - barbican-tempest-plugin-simple-crypto-jammy
         - barbican-tempest-plugin-simple-crypto-secure-rbac
         - barbican-tempest-plugin-simple-crypto-2025-2
         - barbican-tempest-plugin-simple-crypto-2025-1
@@ -17,10 +16,9 @@
     gate:
       jobs:
         - barbican-tempest-plugin-simple-crypto
-        - barbican-tempest-plugin-simple-crypto-jammy
 
 # TODO(gmann): As per the 2025.1 testing runtime, we need to run at least
-# one job on jammy. This job can be removed in 2025.2 cycle.
+# one job on jammy. This job can be removed once 2025.1 is retired.
 - job:
     name: barbican-tempest-plugin-simple-crypto-jammy
     description: This is integrated job testing on Ubuntu jammy(22.04)
