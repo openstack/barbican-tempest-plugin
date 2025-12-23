@@ -99,53 +99,6 @@
               max_microversion: '1.0'
 
 - job:
-    name: barbican-tempest-plugin-simple-crypto-xena
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/xena
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-wallaby
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/wallaby
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: wallaby-last
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-victoria
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/victoria
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: victoria-last
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ussuri
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/ussuri
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: ussuri-last
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-train
-    parent: barbican-tempest-plugin-simple-crypto
-    nodeset: openstack-single-node-bionic
-    override-checkout: stable/train
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: train-last
-    vars: *microversion_v1_0
-
-- job:
     name: barbican-tempest-plugin-simple-crypto-secure-rbac
     parent: barbican-tempest-plugin-simple-crypto
     vars:
@@ -191,26 +144,6 @@
     vars: *microversion_v1_0
 
 - job:
-    name: barbican-tempest-plugin-simple-crypto-secure-rbac-xena
-    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/xena
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-secure-rbac-wallaby
-    parent: barbican-tempest-plugin-simple-crypto-secure-rbac
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/wallaby
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: wallaby-last
-    vars: *microversion_v1_0
-
-- job:
     name: barbican-tempest-plugin-simple-crypto-ipv6-only
     parent: devstack-tempest-ipv6
     required-projects: *barbican-tempest-reqs
@@ -225,36 +158,6 @@
     required-projects:
       - name: openstack/barbican-tempest-plugin
         override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-xena
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/xena
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: a31f9ef3a68e58fe970783d1b7b4cff45e4ee78b
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-wallaby
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/wallaby
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: wallaby-last
-    vars: *microversion_v1_0
-
-- job:
-    name: barbican-tempest-plugin-simple-crypto-ipv6-only-victoria
-    parent: barbican-tempest-plugin-simple-crypto-ipv6-only
-    nodeset: openstack-single-node-focal
-    override-checkout: stable/victoria
-    required-projects:
-      - name: openstack/barbican-tempest-plugin
-        override-checkout: victoria-last
     vars: *microversion_v1_0
 
 - job:
