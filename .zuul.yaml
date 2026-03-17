@@ -7,6 +7,7 @@
       jobs:
         - barbican-tempest-plugin-simple-crypto
         - barbican-tempest-plugin-simple-crypto-secure-rbac
+        - barbican-tempest-plugin-simple-crypto-2026-1
         - barbican-tempest-plugin-simple-crypto-2025-2
         - barbican-tempest-plugin-simple-crypto-2025-1
         - barbican-tempest-plugin-simple-crypto-2024-2
@@ -65,10 +66,10 @@
         - barbican-tempest-plugin
 
 - job:
-    name: barbican-tempest-plugin-simple-crypto-2025-2
+    name: barbican-tempest-plugin-simple-crypto-2026-1
     parent: barbican-tempest-plugin-simple-crypto
     nodeset: openstack-single-node-noble
-    override-checkout: stable/2025.1
+    override-checkout: stable/2026.1
     vars: &microversion_v1_1
       devstack_local_conf:
         test-config:
@@ -76,6 +77,12 @@
             key_manager:
               min_microversion: '1.0'
               max_microversion: '1.1'
+- job:
+    name: barbican-tempest-plugin-simple-crypto-2025-2
+    parent: barbican-tempest-plugin-simple-crypto
+    nodeset: openstack-single-node-noble
+    override-checkout: stable/2025.2
+    vars: *microversion_v1_1
 
 - job:
     name: barbican-tempest-plugin-simple-crypto-2025-1
