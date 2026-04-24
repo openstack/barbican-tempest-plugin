@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations under
 # the License.
 
+from tempest import clients
 from tempest import config
 from tempest.lib.services import clients as cli
 
@@ -24,8 +25,5 @@ class Clients(cli.ServiceClients):
     def __init__(self, credentials, service=None):
         """Emulate the interface of Tempest's clients.Manager"""
         # Identity settings
-        if CONF.identity.auth_version == 'v2':
-            identity_uri = CONF.identity.uri
-        else:
-            identity_uri = CONF.identity.uri_v3
+        _, identity_uri = clients.get_auth_provider_class(credentials)
         super(Clients, self).__init__(credentials, identity_uri)
