@@ -14,7 +14,6 @@
 #    under the License.
 
 import base64
-from datetime import datetime
 from datetime import timedelta
 import os
 
@@ -22,6 +21,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
+from oslo_utils import timeutils
 from tempest.lib import decorators
 
 from barbican_tempest_plugin.tests.api import base
@@ -44,7 +44,7 @@ class SecretsTest(base.BaseKeyManagerTest):
             iterations=1000, backend=default_backend()
         )
         key = base64.b64encode(kdf.derive(password))
-        expire_time = (datetime.utcnow() + timedelta(days=5))
+        expire_time = (timeutils.utcnow() + timedelta(days=5))
         sec = self.create_secret(
             expiration=expire_time.isoformat(), algorithm="aes",
             bit_length=256, mode="cbc", payload=key,

@@ -12,9 +12,9 @@
 
 import abc
 import base64
-from datetime import datetime
 from datetime import timedelta
 
+from oslo_utils import timeutils
 from tempest import config
 from tempest.lib.common.utils import data_utils
 from tempest.lib import decorators
@@ -277,7 +277,7 @@ class ProjectReaderTests(ProjectReaderBase, BarbicanV1RbacSecrets):
         self.assertRaises(exceptions.Forbidden, self.client.create_secret)
 
         key = rbac_base.create_aes_key()
-        expire_time = (datetime.utcnow() + timedelta(days=5))
+        expire_time = (timeutils.utcnow() + timedelta(days=5))
 
         self.assertRaises(
             exceptions.Forbidden, self.client.create_secret,
@@ -521,7 +521,7 @@ class ProjectMemberTests(ProjectReaderTests):
         self.client.create_secret(name='test_create_secret')
 
         key = rbac_base.create_aes_key()
-        expire_time = (datetime.utcnow() + timedelta(days=5))
+        expire_time = (timeutils.utcnow() + timedelta(days=5))
         self.client.create_secret(
             name='test_create_secret2',
             expiration=expire_time.isoformat(), algorithm="aes",
