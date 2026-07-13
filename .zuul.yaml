@@ -175,4 +175,4 @@
     name: barbican-tempest-plugin-simple-crypto-cursive
     parent: barbican-tempest-plugin-simple-crypto
     required-projects:
-      - opendev.org/x/cursive
+      - opendev.org/openstack/cursive
